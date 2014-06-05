@@ -3,21 +3,6 @@ RPGEngine
 
 Uses Rabbit to power a program that will assist in Dungeons and Dragons, Pathfinder, etc. roleplaying calculations.
 
-INSTALLATION:
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
-### WINDOWS:
-1. Unzip RPGEngine.zip to the location you would like to run it from.
-2. Insure that all the contents of RPGEngine.zip are in the same place. That includes the 'dist' and 'build' folders and 'RPGEngine.bat'.
-3. Run 'RPGEngine.bat' every time you would like to use the program.
-
-### OTHER:
-1. Unzip MacRPGEngine.zip to the location you would like to run it from
-2. Insure that all the contents of MacRPGEngine.zip are in the same place. That includes 'RPGEngine.py', 'PythonPlus.pyc', 'Rules.txt', 'Player.gif', 'Enemy.gif', and 'Pixel.gif'.
-3. Run 'RPGEngine.py' as an executable every time you would like to use the program
-4. If you are still unable to launch the file, download Python 2.7 (http://www.python.org/download/)
-5. Then, run RPGEngine.py using the Python Launcher
-
 BASIC TUTORIAL:
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -121,7 +106,7 @@ end			# This command will end the battle.
 ADVANCED TUTORIAL:
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-NOTICE: Do not begin the advanced tutorial until you have finished reading over the Basic Tutorial. Reading over the Advanced Tutorial is NOT necessary to use all of the core functions of RPGEngine. ONLY advanced users should consider reading over the advanced tutorial.
+Do not begin the advanced tutorial until you have finished reading over the Basic Tutorial. Reading over the Advanced Tutorial is not necessary to use all of the core functions of RPGEngine, but it is recommended.
 
 This tutorial will explain the uses for the remaining less-used commands that were not covered by the Basic Tutorial. The Advanced Tutorial will also include instructions on modifying and adding to RPGEngine.
 
