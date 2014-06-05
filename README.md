@@ -85,9 +85,10 @@ disconnect				# This command will disconnect you from whomever you are currently
 
 ### CHATTING:
 RPGEngine comes with built-in chat functionality while connected to others. Here is a list of commands to use that functionality:
-
-chat				# This command turns chat on or off for you. Use this command to prevent yourself from receiving chat messages.
-"my cmb is "+cmb	# Putting something in quotation marks will send a chat message. Variables can be added to messages just like they were numbers and their values will be added to the string.
+```
+chat					# This command turns chat on or off for you. Use this command to prevent yourself from receiving chat messages.
+"my cmb is "+cmb		# Putting something in quotation marks will send a chat message. Variables can be added to messages just like they were numbers and their values will be added to the string.
+```
 
 ### PLAYING ENCOUNTERS:
 RPGEngine also supports a dynamic game system. This comes in the form of a large grid that you can move your character around if you are a player or draw in places and enemies if you are the host. Using this system is somewhat complicated at first. We'll start with the basics:
