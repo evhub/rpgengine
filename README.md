@@ -21,8 +21,9 @@ roll a		# This command will make a roll (default d20) and add the value of 'a' t
 
 ### IMPORTING A PC:
 To fully utilize RPGEngine it is highly recommended that you import a character from PCGen. Here is how you do that:
+
 1. Create your character in PCGen
-2. Go to 'file' then 'export' and choose the second one from the bottom (my_outputsheets/my_fantasy/mtmlxml/csheet_my_fantasy_output_sheet.htm) and without changing any of the other settings select 'Export'
+2. Go to 'file' then 'export' and choose the second one from the bottom (my\_outputsheets/my\_fantasy/mtmlxml/csheet\_my\_fantasy\_output\_sheet.htm) and without changing any of the other settings select 'Export'
 3. Save the file and then open it so you can select the text in it without the encoding (any web browser should work)
 4. Copy ALL the text from the file into a file PC.txt
 5. Place PC.txt in the same directory as RPGEngine (On Windows that means in your 'dist' folder)
