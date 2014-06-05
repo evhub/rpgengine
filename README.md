@@ -3,23 +3,21 @@ RPGEngine
 
 Uses Rabbit to power a program that will assist in Dungeons and Dragons, Pathfinder, etc. roleplaying calculations.
 
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 INSTALLATION:
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-## WINDOWS:
+### WINDOWS:
 1. Unzip RPGEngine.zip to the location you would like to run it from.
 2. Insure that all the contents of RPGEngine.zip are in the same place. That includes the 'dist' and 'build' folders and 'RPGEngine.bat'.
 3. Run 'RPGEngine.bat' every time you would like to use the program.
 
-## OTHER:
+### OTHER:
 1. Unzip MacRPGEngine.zip to the location you would like to run it from
 2. Insure that all the contents of MacRPGEngine.zip are in the same place. That includes 'RPGEngine.py', 'PythonPlus.pyc', 'Rules.txt', 'Player.gif', 'Enemy.gif', and 'Pixel.gif'.
 3. Run 'RPGEngine.py' as an executable every time you would like to use the program
 4. If you are still unable to launch the file, download Python 2.7 (http://www.python.org/download/)
 5. Then, run RPGEngine.py using the Python Launcher
 
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 BASIC TUTORIAL:
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -27,7 +25,7 @@ While RPGEngine can seem intimidating at first, it's really quite simple and ver
 
 When you boot up RPGEngine the first window you will see is the 'console.' The console is where commands are entered and text is displayed. To see a list of console commands type 'help' in the console.
 
-## THE CONSOLE:
+### THE CONSOLE:
 The console is very powerful. It can do dynamic mathematical calculations, make rolls, keep track of variables, and much more. Here are some common examples of things you can do with the console:
 ```
 a = b*2		# The console can be used to set or change variables. A command of this form will set the variable 'a' to the value 'b' times two.
@@ -36,7 +34,7 @@ a+1			# This command will print the value of 'a' plus one to the console. This f
 roll a		# This command will make a roll (default d20) and add the value of 'a' to it. Both the base roll and the total will be shown.
 ```
 
-## IMPORTING A PC:
+### IMPORTING A PC:
 To fully utilize RPGEngine it is highly recommended that you import a character from PCGen. Here is how you do that:
 1. Create your character in PCGen
 2. Go to 'file' then 'export' and choose the second one from the bottom (my_outputsheets/my_fantasy/mtmlxml/csheet_my_fantasy_output_sheet.htm) and without changing any of the other settings select 'Export'
@@ -44,7 +42,7 @@ To fully utilize RPGEngine it is highly recommended that you import a character 
 4. Copy ALL the text from the file into a file PC.txt
 5. Place PC.txt in the same directory as RPGEngine (On Windows that means in your 'dist' folder)
 
-## USING YOUR PC:
+### USING YOUR PC:
 Importing a PC will load a suite of variables into your console that correspond to your character's attributes. Here are some examples:
 ```
 initiative	# Lots of basic statistics are loaded.
@@ -67,7 +65,7 @@ character	# This will display a basic summary of your character
 				# NOTE: Type 'skills' to display your skills.
 ```
 
-## EQUIPPING WEAPONS:
+### EQUIPPING WEAPONS:
 Upon loading in your PC you will notice that the variables 'attack' and 'damage' are left undefined. That is because the program doesn't know what weapon you would like to use. Here are the commands you would use to tell it:
 ```
 weapons					# This will list off the different weapons available to you.
@@ -76,7 +74,7 @@ equip unarmed			# This will equip the weapon 'unarmed'. Doing this will set the 
 create weapon 1 1d2+1	# This will create a weapon called 'weapon' that has a '1' attack and a '1d2+1' damage.
 ```
 
-## CONNECTING TO OTHERS:
+### CONNECTING TO OTHERS:
 One of RPGEngine's main features is the ability to connect to others. Once a connection is creaed a whole suite of new features become available. Creating a connection is quite simple and only requires a couple of commands:
 ```
 join 25566 8.24.563.274	# This command is used to connect to a game that is being created by the host. The first variable is the port, the second is the IP address.
@@ -85,13 +83,13 @@ host 25566 4			# This command is used to host a game. The first variable is the 
 disconnect				# This command will disconnect you from whomever you are currently connected to.
 ```
 
-## CHATTING:
+### CHATTING:
 RPGEngine comes with built-in chat functionality while connected to others. Here is a list of commands to use that functionality:
 
 chat				# This command turns chat on or off for you. Use this command to prevent yourself from receiving chat messages.
 "my cmb is "+cmb	# Putting something in quotation marks will send a chat message. Variables can be added to messages just like they were numbers and their values will be added to the string.
 
-## PLAYING ENCOUNTERS:
+### PLAYING ENCOUNTERS:
 RPGEngine also supports a dynamic game system. This comes in the form of a large grid that you can move your character around if you are a player or draw in places and enemies if you are the host. Using this system is somewhat complicated at first. We'll start with the basics:
 ```
 encounter	# This command will initiate an encounter. All connected players must enter the encounter to start.
@@ -119,7 +117,6 @@ end			# This command will end the battle.
 				# NOTE: This command can only be used by the host during his/her turn.
 ```
 
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ADVANCED TUTORIAL:
 ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -127,7 +124,7 @@ NOTICE: Do not begin the advanced tutorial until you have finished reading over 
 
 This tutorial will explain the uses for the remaining less-used commands that were not covered by the Basic Tutorial. The Advanced Tutorial will also include instructions on modifying and adding to RPGEngine.
 
-## ADVANCED COMMANDS:
+### ADVANCED COMMANDS:
 We'll begin the advanced tutorial by covering some of the more complicated console commands. Here are the rest of the commands not covered by the Basic Tutorial:
 ```
 open						# This command will allow one extra player to join an in-progress game.
@@ -143,7 +140,7 @@ run Extras.txt				# This command will run a file that contains commands.
 extras = import Extras.py	# This command will import a specially-written RPGEngine python add-on. Instructions for writing these add-ons can be found lower down.
 ```
 
-## CHANGING OPTIONS:
+### CHANGING OPTIONS:
 To change different RPGEngine options one should navigate to and open the file 'Rules.txt' within their RPGEngine directory. Once in that file changes can be made as necessary. Every line in the file that does not start with a '#' will be run as a command. Certain special variables must be defined in Rules.txt. They are:
 ```
 str			# Attribute modifiers must be defined. Attribute scores are imported.
@@ -151,7 +148,7 @@ base_roll	# This defines the base roll to be made when the 'roll' command is use
 rest_health	# This defines the health restored when the 'rest' command is used.
 ```
 
-## MODIFYING GRAPHICS:
+### MODIFYING GRAPHICS:
 RPGEngine uses different '.gif' files to build it's game space. Here are descriptions of those files and how to use them:
 ```
 Player.gif	# This graphic defines what players look like. It should be square.
