@@ -52,3 +52,8 @@ coverage.xml
 # Sphinx documentation
 docs/_build/
 
+# Macintosh Desktop Services Store files.
+.DS_Store
+
+# PC File
+PC.txt
