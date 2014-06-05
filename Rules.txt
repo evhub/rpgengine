@@ -37,8 +37,8 @@ refl = reflex
 flurry_bonus(x) = monk+-2@x<=1; monk+-7@x<=3; monk+-12@x<=5; monk+-17
 flurry_normal = attack+-1*bab
 flurry_get(flurry_normal) = flurry_normal@len(bab)<=1; flurry_normal:0
-flurry_number(monk) = 0@monk=0; 2@monk<=5; 3@monk<=7; 4@monk<=10; 5@monk=11; 6@monk<=14; 7@monk=15; 8@monk=16; 9
-flurry(x) = range(0,flurry_number(monk)) ~ (flurry_get(flurry_normal)+flurry_bonus(x))
+flurry_number(monk) = 0@monk?=0; 2@monk<=5; 3@monk<=7; 4@monk<=10; 5@monk?=11; 6@monk<=14; 7@monk?=15; 8@monk?=16; 9
+flurry(x) = range(0,flurry_number(monk)) ~ \x\(flurry_get(flurry_normal)+flurry_bonus(x))
 
 # New Materia Extras:
 nanopoints = nanopoints_autochemist + nanopoints_roboticist + nanopoints_hybrid
