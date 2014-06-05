@@ -1006,7 +1006,7 @@ Import Commands:
     def gui(self, width=800, height=600):
         self.turn = 0
         self.top = self.window()
-        self.top.bind("<Escape>", lambda event: self.xgui())
+        rootbind(self.top, self.xgui)
         self.top.bind("<Up>", lambda event: self.up())
         self.top.bind("<Down>", lambda event: self.down())
         self.top.bind("<Right>", lambda event: self.right())
