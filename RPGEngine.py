@@ -56,20 +56,7 @@ def remparens(inputstring):
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 class main(mathbase):
-    def __init__(self, override=False, sendroll=False, debug=False, speed=400, height=10):
-        self.oldshow = lambda *args: mathbase.show(self, *args)
-        self.debug = int(debug)
-        self.speed = speed
-        self.override = override
-        self.sendroll = sendroll
-        self.root, self.app, self.box = startconsole(self.handler, "Loading RPGEngine...", "RPGEngine", height)
-        self.show = self.app.display
-        self.errorlog = {}
-        self.returned = 1
-        self.ans = [matrix(0)]
-        self.populator()
-        self.load()
-        self.helpstring = """Basic Commands:
+    helpstring = """Basic Commands:
     <command> [;; <command> ;; <command>...]
     <name> [:]= <expression>
 Expressions:
@@ -115,6 +102,21 @@ Import Commands:
     <name> = import <file>
     run <file>
     save <file>"""
+
+    def __init__(self, override=False, sendroll=False, debug=False, speed=400, height=10):
+        self.oldshow = lambda *args: mathbase.show(self, *args)
+        self.debug = int(debug)
+        self.printdebug(": ON")
+        self.speed = speed
+        self.override = override
+        self.sendroll = sendroll
+        self.root, self.app, self.box = startconsole(self.handler, "Loading RPGEngine...", "RPGEngine", height)
+        self.show = self.app.display
+        self.errorlog = {}
+        self.returned = 1
+        self.ans = [matrix(0)]
+        self.populator()
+        self.load()
         self.server = -1
         self.turn = -1
         self.x = -1
@@ -123,14 +125,30 @@ Import Commands:
         if not self.evalfile("Rules.txt"):
             popup("Error", "Error finding Rules.txt for import.")
             self.app.display("Unable to find Rules.txt for import.")
-        if self.debug > 0:
+        if self.debug:
             self.debugvariables = globals()
             self.debugvariables.update(self.__dict__)
             self.debugvariables.update(locals())
         self.app.display("Enter A Command:")
 
+    def setdebug(self, state):
+        """Sets The Debugging State."""
+        self.e.debug = True
+        if self.debug:
+            self.e.printdebug(": OFF")
+        else:
+            self.e.printdebug(": ON")
+        self.debug = int(state)
+        self.e.debug = self.debug
+
     def load(self):
-        if self.debug == 0:
+        if self.debug:
+            self.app.display("Warning: Debug mode active.")
+            tempfile = openfile("PC.txt", "rb")
+            base = readfile(tempfile)
+            self.fromsheet(base)
+            tempfile.close()
+        else:
             try:
                 tempfile = openfile("PC.txt", "rb")
                 base = readfile(tempfile)
@@ -143,12 +161,6 @@ Import Commands:
                 self.app.display("Unable to load PC.txt for import.")
             else:
                 self.app.display("Successfully imported PC.txt.")
-        else:
-            self.app.display("Warning: Debug mode active.")
-            tempfile = openfile("PC.txt", "rb")
-            base = readfile(tempfile)
-            self.fromsheet(base)
-            tempfile.close()
 
     def fromsheet(self, base):
         lines = base.splitlines()
@@ -644,7 +656,7 @@ Import Commands:
 
     def cmd_scan(self, original):
         if superformat(original) == "scan":
-            if self.debug > 0:
+            if self.debug:
                 self.app.display("SCANNING MEMORY...")
                 self.debugvariables.update(globals())
                 self.debugvariables.update(self.__dict__)
@@ -807,8 +819,8 @@ Import Commands:
             return out
 
     def refresh(self):
-        if self.debug > 0:
-            print str(self.debug)+" ("+str(self.encounter)+"):", self.que
+        if self.debug:
+            print(str(self.debug)+" ("+str(self.encounter)+"):", self.que)
             self.debug += 1
         if self.server == 0:
             test = self.retreive().strip("#")
