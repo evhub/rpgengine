@@ -55,7 +55,7 @@ def remparens(inputstring):
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-class main(mathbase):
+class main(mathbase, serverbase):
     helpstring = """Basic Commands:
     <command> [;; <command> ;; <command>...]
     <name> [:]= <expression>
@@ -673,14 +673,6 @@ Import Commands:
     def inverse(self, x, y):
         return int((x - self.width/2)/self.xsize)-1, int((y - self.height/2)/self.ysize)*-1+1
 
-    def sync(self):
-        if self.server == 0:
-            self.que.append("$")
-            self.receive()
-        else:
-            self.receive()
-            self.csend("$")
-
     def battle(self):
         self.x = 0
         self.turn = 0
@@ -748,7 +740,7 @@ Import Commands:
             self.x += 1
             self.register(self.rounds, 600)
         else:
-            self.csend("-")
+            self.send("-")
             self.x = -1
             self.app.display("Battle Ended.")
             self.turn = 2
@@ -760,70 +752,16 @@ Import Commands:
                 return i
         return None
 
-    def receive(self):
-        if self.server == 0:
-            while self.sent == None:
-                self.root.update()
-            temp = self.sent
-            self.sent = None
-            return temp
-        else:
-            while len(self.sent) < self.number:
-                self.root.update()
-            temp = self.sent
-            self.sent = []
-            return temp
-
     def chat(self, msg):
         if self.talk == 1:
-            self.app.display("> "+msg)
-
-    def textmsg(self, item):
-        if self.server == 0:
-            self.que.append("+:"+item)
-        elif self.server == 1:
-            output = self.e.variables["name"]+item
-            self.chat(output)
-            self.csend("+:"+output)
-
-    def csend(self, item):
-        for a in self.c.c:
-            self.que[a].append(item)
-
-    def addsent(self, item):
-        if self.server == 0:
-            if item.startswith("+:"):
-                self.chat(item[2:])
-            else:
-                self.sent = item
-        elif self.server == 1:
-            i,a = item
-            if i.startswith("+:"):
-                i = i[2:]
-                output = self.names[a]+i
-                self.csend("+:"+output)
-                self.chat(output)
-            else:
-                self.sent.append((i,a))
-
-    def retreive(self, a=None):
-        try:
-            if a == None:
-                out = self.c.retreive(self.root.update)
-            else:
-                out = self.c.retreive(a, self.root.update)
-        except IOError:
-            self.disconnect()
-            raise RuntimeError
-        else:
-            return out
+            self.app.display("> "+str(msg))
 
     def refresh(self):
         if self.debug:
             print(str(self.debug)+" ("+str(self.encounter)+"):", self.que)
             self.debug += 1
         if self.server == 0:
-            test = self.retreive().strip("#")
+            test = self.retrieve().strip("#")
             if test != "":
                 self.addsent(test)
             if len(self.que) > 0:
@@ -834,20 +772,20 @@ Import Commands:
                 self.c.fsend("#")
             self.c.fsend(self.encounter)
             self.root.update()
-            if self.retreive().strip("#") == "1":
+            if self.retrieve().strip("#") == "1":
                 self.c.fsend(str(self.locx)+","+str(self.locy))
                 self.players = []
-                players = clean(self.retreive()[1:-1].split("), "))
+                players = clean(self.retrieve()[1:-1].split("), "))
                 for x in players:
                     x = remparens(x[1:]).split(", ")
                     self.players.append((int(x[0]), int(x[1])))
                 self.enemies = []
-                enemies = clean(self.retreive()[1:-1].split("), "))
+                enemies = clean(self.retrieve()[1:-1].split("), "))
                 for x in enemies:
                     x = remparens(x[1:]).split(", ")
                     self.enemies.append((int(x[0]), int(x[1])))
                 self.structures = []
-                structures = clean(self.retreive()[1:-1].split("), "))
+                structures = clean(self.retrieve()[1:-1].split("), "))
                 for x in structures:
                         x = remparens(x[1:]).split(", ")
                         self.structures.append((float(x[0]), float(x[1]), float(x[2]), float(x[3])))
@@ -865,13 +803,13 @@ Import Commands:
             self.root.update()
             for a in self.c.c:
                 temp[a] = None
-                test = self.retreive(a)
+                test = self.retrieve(a)
                 if test != "#":
                     if test.startswith("#"):
                         temp[a] = test.strip("#")
                     else:
                         self.addsent((test,a))
-                encounter += int(getnum(self.retreive(a).strip("#")))
+                encounter += int(getnum(self.retrieve(a).strip("#")))
             if encounter < self.number+1:
                 for a in self.c.c:
                     self.c.fsend(a, "0")
@@ -882,7 +820,7 @@ Import Commands:
                 data = {}
                 for a in self.c.c:
                     if temp[a] == None:
-                        trash = self.retreive(a).split(",")
+                        trash = self.retrieve(a).split(",")
                     else:
                         trash = temp[a].split(",")
                     data[a] = (int(trash[0]), int(trash[1]))
@@ -1062,16 +1000,6 @@ Import Commands:
         self.encounter = -1
         self.identifiers = []
         self.turn = -1
-
-    def disconnect(self):
-        self.talk = 0
-        if self.server == 0:
-            self.c.close()
-        else:
-            for a in dict(self.c.c):
-                self.c.close(a)
-        self.server = -1
-        self.app.display("Disconnected.")
 
     def namer(self):
         for n,a in self.sent:
