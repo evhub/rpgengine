@@ -531,7 +531,7 @@ Import Commands:
                 self.c.connect(int(original[0]))
             self.app.display("Connected.")
             self.server = 0
-            self.que = [self.e.variables["name"]]
+            self.queue = [self.e.variables["name"]]
             self.sent = None
             self.talk = 1
             self.register(self.refresh, self.speed)
@@ -550,9 +550,9 @@ Import Commands:
             self.c.start(self.number)
             self.app.display("Connected.")
             self.server = 1
-            self.que = {}
+            self.queue = {}
             for a in self.c.c:
-                self.que[a] = []
+                self.queue[a] = []
             self.sent = []
             self.talk = 1
             self.names = {None:self.e.variables["name"]}
@@ -601,7 +601,7 @@ Import Commands:
     def cmd_hold(self, original):
         if superformat(original) == "hold":
             if self.server == 0 and self.turn == 1:
-                self.que.append("0")
+                self.queue.append("0")
                 self.turn = 0
             elif self.server == 1 and self.turn == 2:
                 for x in xrange(0, len(self.order)-1):
@@ -616,7 +616,7 @@ Import Commands:
     def cmd_done(self, original):
         if superformat(original) == "done":
             if self.server == 0 and self.turn == 1:
-                self.que.append("1")
+                self.queue.append("1")
                 self.turn = 0
             elif self.server == 1 and self.turn == 2:
                 self.turn = 0
@@ -681,7 +681,7 @@ Import Commands:
             self.app.display("Initiative Roll: "+self.e.prepare(roll, False, False))
             total = str(float(roll+self.calc("initiative")))
             self.app.display("Initiative Total: "+total)
-            self.que.append(total)
+            self.queue.append(total)
             self.register(self.idle, 600)
         elif self.server == 1:
             roll = self.calc("base_roll")
@@ -729,7 +729,7 @@ Import Commands:
                 while self.turn > 0:
                     self.root.update()
             else:
-                self.que[self.order[self.x]].append("0")
+                self.queue[self.order[self.x]].append("0")
                 waited = self.wait()
                 while waited == None:
                     self.root.update()
@@ -758,16 +758,16 @@ Import Commands:
 
     def refresh(self):
         if self.debug:
-            print(str(self.debug)+" ("+str(self.encounter)+"):", self.que)
+            print(str(self.debug)+" ("+str(self.encounter)+"):", self.queue)
             self.debug += 1
         if self.server == 0:
             test = self.retrieve().strip("#")
             if test != "":
                 self.addsent(test)
-            if len(self.que) > 0:
-                self.que.reverse()
-                self.c.fsend(self.que.pop())
-                self.que.reverse()
+            if len(self.queue) > 0:
+                self.queue.reverse()
+                self.c.fsend(self.queue.pop())
+                self.queue.reverse()
             else:
                 self.c.fsend("#")
             self.c.fsend(self.encounter)
@@ -792,10 +792,10 @@ Import Commands:
             self.register(self.refresh, self.speed)
         elif self.server == 1:
             for a in self.c.c:
-                if len(self.que[a]) > 0:
-                    self.que[a].reverse()
-                    self.c.fsend(a, self.que[a].pop())
-                    self.que[a].reverse()
+                if len(self.queue[a]) > 0:
+                    self.queue[a].reverse()
+                    self.c.fsend(a, self.queue[a].pop())
+                    self.queue[a].reverse()
                 else:
                     self.c.fsend(a, "#")
             temp = {}
