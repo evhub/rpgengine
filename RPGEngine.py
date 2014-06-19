@@ -103,12 +103,11 @@ Import Commands:
     run <file>
     save <file>"""
 
-    def __init__(self, override=False, sendroll=False, debug=False, speed=400, height=10, chatstring="+:"):
+    def __init__(self, override=False, sendroll=False, debug=False, speed=400, height=10):
         self.oldshow = lambda *args: mathbase.show(self, *args)
         self.debug = int(debug)
         self.printdebug(": ON")
         self.speed = speed
-        self.chatstring = str(chatstring)
         self.override = override
         self.sendroll = sendroll
         self.root, self.app, self.box = startconsole(self.handler, "Loading RPGEngine...", "RPGEngine", height)
@@ -533,7 +532,7 @@ Import Commands:
             self.app.display("Connected.")
             self.server = False
             self.queue = [self.e.variables["name"]]
-            self.sent = None
+            self.sent = []
             self.talk = 1
             self.register(self.refresh, self.speed)
             return True
@@ -552,9 +551,10 @@ Import Commands:
             self.app.display("Connected.")
             self.server = True
             self.queue = {}
+            self.sent = {}
             for a in self.c.c:
                 self.queue[a] = []
-            self.sent = []
+                self.sent[a] = []
             self.talk = 1
             self.names = {None:self.e.variables["name"]}
             self.register(self.refresh, self.speed)
@@ -703,16 +703,15 @@ Import Commands:
             self.register(self.idle, 600)
 
     def idle(self):
-        if self.sent == "0":
-            self.sent = None
+        item = self.getsent()
+        if item == "0":
             self.turn = 1
             popup("Info", "It's your turn!")
             self.app.display("It's your turn!")
             while self.turn > 0:
                 self.root.update()
             self.register(self.idle, 600)
-        elif self.sent == "-":
-            self.sent = None
+        elif item == "-":
             self.x = -1
             self.app.display("Battle Ended.")
             self.turn = 1
@@ -747,9 +746,8 @@ Import Commands:
             self.turn = 2
 
     def wait(self):
-        for i,a in self.sent:
+        for i,a in self.getsent():
             if a == self.order[self.x]:
-                self.sent = []
                 return i
         return None
 
@@ -1001,11 +999,6 @@ Import Commands:
         self.encounter = -1
         self.identifiers = []
         self.turn = -1
-
-    def namer(self):
-        for n,a in self.sent:
-            self.names[a] = n
-        self.sent = []
 
 if __name__ == "__main__":
     main(override, sendroll, debug, speed).start()
