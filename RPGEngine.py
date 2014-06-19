@@ -103,11 +103,12 @@ Import Commands:
     run <file>
     save <file>"""
 
-    def __init__(self, override=False, sendroll=False, debug=False, speed=400, height=10):
+    def __init__(self, override=False, sendroll=False, debug=False, speed=400, height=10, chatstring="+:"):
         self.oldshow = lambda *args: mathbase.show(self, *args)
         self.debug = int(debug)
         self.printdebug(": ON")
         self.speed = speed
+        self.chatstring = str(chatstring)
         self.override = override
         self.sendroll = sendroll
         self.root, self.app, self.box = startconsole(self.handler, "Loading RPGEngine...", "RPGEngine", height)
@@ -117,7 +118,7 @@ Import Commands:
         self.ans = [matrix(0)]
         self.populator()
         self.load()
-        self.server = -1
+        self.server = None
         self.turn = -1
         self.x = -1
         self.talk = 0
@@ -530,7 +531,7 @@ Import Commands:
             else:
                 self.c.connect(int(original[0]))
             self.app.display("Connected.")
-            self.server = 0
+            self.server = False
             self.queue = [self.e.variables["name"]]
             self.sent = None
             self.talk = 1
@@ -549,7 +550,7 @@ Import Commands:
                 self.number = int(original[1])
             self.c.start(self.number)
             self.app.display("Connected.")
-            self.server = 1
+            self.server = True
             self.queue = {}
             for a in self.c.c:
                 self.queue[a] = []
@@ -562,7 +563,7 @@ Import Commands:
 
     def cmd_encounter(self, original):
         if superformat(original) == "encounter":
-            if self.encounter != 0 or self.server < 0:
+            if self.encounter != 0 or self.server == None:
                 self.app.display("You can't use that right now.")
             else:
                 self.app.display("Waiting for other players...")
@@ -573,7 +574,7 @@ Import Commands:
 
     def cmd_disconnect(self, original):
         if superformat(original) == "disconnect":
-            if self.server <0:
+            if self.server == None:
                 self.app.display("You can't use that right now.")
             else:
                 self.disconnect()
@@ -581,7 +582,7 @@ Import Commands:
 
     def cmd_battle(self, original):
         if superformat(original) == "battle":
-            if self.server < 0 or self.x >= 0:
+            if self.server == None or self.x >= 0:
                 self.app.display("You can't use that right now.")
             else:
                 self.battle()
@@ -589,7 +590,7 @@ Import Commands:
 
     def cmd_open(self, original):
         if superformat(original) == "open":
-            if self.server == 1 and self.x < 0:
+            if self.server and self.x < 0:
                 self.number += 1
                 self.app.display("Waiting for a connection...")
                 self.c.add()
@@ -600,10 +601,10 @@ Import Commands:
 
     def cmd_hold(self, original):
         if superformat(original) == "hold":
-            if self.server == 0 and self.turn == 1:
+            if self.server == False and self.turn == 1:
                 self.queue.append("0")
                 self.turn = 0
-            elif self.server == 1 and self.turn == 2:
+            elif self.server and self.turn == 2:
                 for x in xrange(0, len(self.order)-1):
                     if self.order[x] == None:
                         self.order[x] = self.order[x+1]
@@ -615,10 +616,10 @@ Import Commands:
 
     def cmd_done(self, original):
         if superformat(original) == "done":
-            if self.server == 0 and self.turn == 1:
+            if self.server == False and self.turn == 1:
                 self.queue.append("1")
                 self.turn = 0
-            elif self.server == 1 and self.turn == 2:
+            elif self.server and self.turn == 2:
                 self.turn = 0
             else:
                 self.app.display("You can't use that right now.")
@@ -626,7 +627,7 @@ Import Commands:
 
     def cmd_wipe(self, original):
         if superformat(original) == "wipe":
-            if self.server == 1 and self.turn == 2:
+            if self.server and self.turn == 2:
                 self.structures = []
             else:
                 self.app.display("You can't use that right now.")
@@ -634,7 +635,7 @@ Import Commands:
 
     def cmd_end(self, original):
         if superformat(original) == "end":
-            if self.server == 1 and self.turn == 2:
+            if self.server and self.turn == 2:
                 self.turn = 0
                 self.x = -2
             else:
@@ -647,7 +648,7 @@ Import Commands:
                 self.talk = 0
                 self.app.display("Chat turned off.")
             elif self.talk == 0:
-                if self.server < 0:
+                if self.server == None:
                     self.app.display("You can't use that right now.")
                 else:
                     self.talk = 1
@@ -676,14 +677,7 @@ Import Commands:
     def battle(self):
         self.x = 0
         self.turn = 0
-        if self.server == 0:
-            roll = self.calc("base_roll")
-            self.app.display("Initiative Roll: "+self.e.prepare(roll, False, False))
-            total = str(float(roll+self.calc("initiative")))
-            self.app.display("Initiative Total: "+total)
-            self.queue.append(total)
-            self.register(self.idle, 600)
-        elif self.server == 1:
+        if self.server:
             roll = self.calc("base_roll")
             self.app.display("Initiative Roll: "+self.e.prepare(roll, False, False))
             total = float(roll+self.calc("initiative"))
@@ -700,6 +694,13 @@ Import Commands:
             self.textmsg(initdisplay[:-2])
             self.app.display("Beginning Battle...")
             self.register(self.rounds, 600)
+        elif self.server != None:
+            roll = self.calc("base_roll")
+            self.app.display("Initiative Roll: "+self.e.prepare(roll, False, False))
+            total = str(float(roll+self.calc("initiative")))
+            self.app.display("Initiative Total: "+total)
+            self.queue.append(total)
+            self.register(self.idle, 600)
 
     def idle(self):
         if self.sent == "0":
@@ -760,37 +761,7 @@ Import Commands:
         if self.debug:
             print(str(self.debug)+" ("+str(self.encounter)+"):", self.queue)
             self.debug += 1
-        if self.server == 0:
-            test = self.retrieve().strip("#")
-            if test != "":
-                self.addsent(test)
-            if len(self.queue) > 0:
-                self.queue.reverse()
-                self.c.fsend(self.queue.pop())
-                self.queue.reverse()
-            else:
-                self.c.fsend("#")
-            self.c.fsend(self.encounter)
-            self.root.update()
-            if self.retrieve().strip("#") == "1":
-                self.c.fsend(str(self.locx)+","+str(self.locy))
-                self.players = []
-                players = clean(self.retrieve()[1:-1].split("), "))
-                for x in players:
-                    x = remparens(x[1:]).split(", ")
-                    self.players.append((int(x[0]), int(x[1])))
-                self.enemies = []
-                enemies = clean(self.retrieve()[1:-1].split("), "))
-                for x in enemies:
-                    x = remparens(x[1:]).split(", ")
-                    self.enemies.append((int(x[0]), int(x[1])))
-                self.structures = []
-                structures = clean(self.retrieve()[1:-1].split("), "))
-                for x in structures:
-                        x = remparens(x[1:]).split(", ")
-                        self.structures.append((float(x[0]), float(x[1]), float(x[2]), float(x[3])))
-            self.register(self.refresh, self.speed)
-        elif self.server == 1:
+        if self.server:
             for a in self.c.c:
                 if len(self.queue[a]) > 0:
                     self.queue[a].reverse()
@@ -835,6 +806,36 @@ Import Commands:
                 for k in data.values():
                     self.players.append(k)
             self.register(self.refresh, self.speed)
+        elif self.server != None:
+            test = self.retrieve().strip("#")
+            if test != "":
+                self.addsent(test)
+            if len(self.queue) > 0:
+                self.queue.reverse()
+                self.c.fsend(self.queue.pop())
+                self.queue.reverse()
+            else:
+                self.c.fsend("#")
+            self.c.fsend(self.encounter)
+            self.root.update()
+            if self.retrieve().strip("#") == "1":
+                self.c.fsend(str(self.locx)+","+str(self.locy))
+                self.players = []
+                players = clean(self.retrieve()[1:-1].split("), "))
+                for x in players:
+                    x = remparens(x[1:]).split(", ")
+                    self.players.append((int(x[0]), int(x[1])))
+                self.enemies = []
+                enemies = clean(self.retrieve()[1:-1].split("), "))
+                for x in enemies:
+                    x = remparens(x[1:]).split(", ")
+                    self.enemies.append((int(x[0]), int(x[1])))
+                self.structures = []
+                structures = clean(self.retrieve()[1:-1].split("), "))
+                for x in structures:
+                        x = remparens(x[1:]).split(", ")
+                        self.structures.append((float(x[0]), float(x[1]), float(x[2]), float(x[3])))
+            self.register(self.refresh, self.speed)
         if self.encounter == 1:
             self.render()
         elif self.encounter == -1:
@@ -844,7 +845,7 @@ Import Commands:
         for x in self.identifiers:
             self.grid.clear(x)
         self.identifiers = []
-        if self.server == 0:
+        if self.server == False:
             x, y = self.convert(self.locx, self.locy)
             self.identifiers.append(self.grid.new(self.player, x, y))
         for locx,locy in self.players:
@@ -857,7 +858,7 @@ Import Commands:
             self.make(ax,ay, bx,by)
 
     def up(self):
-        if self.server == 0 and (self.override or self.turn == 1):
+        if self.server == False and (self.override or self.turn == 1):
             self.locy += 1
             self.render()
         elif self.selected != None and (self.override or self.turn == 2):
@@ -865,7 +866,7 @@ Import Commands:
             self.render()
 
     def down(self):
-        if self.server == 0 and (self.override or self.turn == 1):
+        if self.server == False and (self.override or self.turn == 1):
             self.locy -= 1
             self.render()
         elif self.selected != None and (self.override or self.turn == 2):
@@ -873,7 +874,7 @@ Import Commands:
             self.render()
 
     def right(self):
-        if self.server == 0 and (self.override or self.turn == 1):
+        if self.server == False and (self.override or self.turn == 1):
             self.locx += 1
             self.render()
         elif self.selected != None and (self.override or self.turn == 2):
@@ -881,7 +882,7 @@ Import Commands:
             self.render()
 
     def left(self):
-        if self.server == 0 and (self.override or self.turn == 1):
+        if self.server == False and (self.override or self.turn == 1):
             self.locx -= 1
             self.render()
         elif self.selected != None and (self.override or self.turn == 2):
@@ -889,7 +890,7 @@ Import Commands:
             self.render()
 
     def draw(self, event):
-        if self.server == 1 and (self.override or self.turn == 2):
+        if self.server and (self.override or self.turn == 2):
             if self.drawing == None:
                 self.drawing = self.grid.convert(event)
             else:
@@ -933,14 +934,14 @@ Import Commands:
                 ax += run
 
     def select(self, event):
-        if self.server == 1 and (self.override or self.turn == 2):
+        if self.server and (self.override or self.turn == 2):
             tx, ty = self.grid.convert(event)
             x, y = self.inverse(tx, ty)
             if (x,y) in self.enemies:
                 self.selected = self.enemies.index((x,y))
 
     def create(self, event):
-        if self.server == 1 and (self.override or self.turn == 2):
+        if self.server and (self.override or self.turn == 2):
             tx, ty = self.grid.convert(event)
             x, y = self.inverse(tx, ty)
             self.enemies.append((x,y))
@@ -985,7 +986,7 @@ Import Commands:
         self.players = []
         self.enemies = []
         self.selected = None
-        if self.server == 0:
+        if self.server == False:
             self.locx, self.locy = 0, 0
             self.turn = 1
         else:
