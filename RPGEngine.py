@@ -546,7 +546,7 @@ Import Commands:
             else:
                 self.number = int(original[1])
             self.talk = 1
-            self.name = self.e.find("name", False, True)
+            self.names = {None: self.e.find("name", False, True)}
             self.register(self.connect, 200)
             return True
 
