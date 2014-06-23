@@ -523,42 +523,31 @@ Import Commands:
         if superformat(original).startswith("join "):
             original = original[5:]
             original = original.split(" ", 1)
-            self.app.display("Connecting...")
-            self.c = client(bool(self.debug))
-            if len(original) > 1:
-                self.c.connect(int(original[0]), original[1])
-            else:
-                self.c.connect(int(original[0]))
-            self.app.display("Connected.")
             self.server = False
-            self.queue = [self.e.variables["name"]]
-            self.sent = []
+            self.app.display("Connecting...")
+            if len(original) > 1:
+                self.port, self.host = int(original[0]), original[1])
+            else:
+                self.port, self.host = original[0], None
             self.talk = 1
-            self.register(self.refresh, self.speed)
+            self.name = self.e.find("name", False, True)
+            self.register(self.connect, 200)
             return True
 
     def cmd_host(self, original):
         if superformat(original).startswith("host "):
             original = original[5:]
             original = original.split(" ", 1)
+            self.server = True
             self.app.display("Waiting for connections...")
-            self.c = multiserver(int(original[0]), debug=bool(self.debug))
+            self.port = int(original[0])
             if len(original) < 2:
                 self.number = 1
             else:
                 self.number = int(original[1])
-            self.c.start(self.number)
-            self.app.display("Connected.")
-            self.server = True
-            self.queue = {}
-            self.sent = {}
-            for a in self.c.c:
-                self.queue[a] = []
-                self.sent[a] = []
             self.talk = 1
-            self.names = {None:self.e.variables["name"]}
-            self.register(self.refresh, self.speed)
-            self.register(self.namer, 600)
+            self.name = self.e.find("name", False, True)
+            self.register(self.connect, 200)
             return True
 
     def cmd_encounter(self, original):
@@ -709,7 +698,7 @@ Import Commands:
             popup("Info", "It's your turn!")
             self.app.display("It's your turn!")
             while self.turn > 0:
-                self.root.update()
+                self.update()
             self.register(self.idle, 600)
         elif item == "-":
             self.x = -1
@@ -727,12 +716,12 @@ Import Commands:
                 popup("Info", "It's your turn!")
                 self.app.display("It's your turn!")
                 while self.turn > 0:
-                    self.root.update()
+                    self.update()
             else:
                 self.queue[self.order[self.x]].append("0")
                 waited = self.wait()
                 while waited == None:
-                    self.root.update()
+                    self.update()
                     waited = self.wait()
                 cmd = int(getnum(waited))
                 if not cmd and self.x < len(self.order):
@@ -755,30 +744,32 @@ Import Commands:
         if self.talk == 1:
             self.app.display("> "+str(msg))
 
-    def refresh(self):
+    def begin(self):
+        self.app.display("Loaded.")
+
+    def refresh(self, empty="#"):
+        self.printdebug("{\n"+str(self.debug)+" ("+str(self.encounter)+"):", self.queue)
         if self.debug:
-            print(str(self.debug)+" ("+str(self.encounter)+"):", self.queue)
             self.debug += 1
+        empty = str(empty)
         if self.server:
             for a in self.c.c:
                 if len(self.queue[a]) > 0:
-                    self.queue[a].reverse()
-                    self.c.fsend(a, self.queue[a].pop())
-                    self.queue[a].reverse()
+                    self.c.fsend(a, self.queue[a].pop(0))
                 else:
-                    self.c.fsend(a, "#")
+                    self.c.fsend(a, empty)
             temp = {}
             encounter = self.encounter
             self.root.update()
             for a in self.c.c:
                 temp[a] = None
                 test = self.retrieve(a)
-                if test != "#":
-                    if test.startswith("#"):
-                        temp[a] = test.strip("#")
+                if test != empty:
+                    if test.startswith(empty):
+                        temp[a] = test.strip(empty)
                     else:
                         self.addsent((test,a))
-                encounter += int(getnum(self.retrieve(a).strip("#")))
+                encounter += int(getnum(self.retrieve(a).strip(empty)))
             if encounter < self.number+1:
                 for a in self.c.c:
                     self.c.fsend(a, "0")
@@ -803,20 +794,17 @@ Import Commands:
                     self.c.fsend(a, self.structures)
                 for k in data.values():
                     self.players.append(k)
-            self.register(self.refresh, self.speed)
         elif self.server != None:
-            test = self.retrieve().strip("#")
-            if test != "":
+            test = self.retrieve().strip(empty)
+            if test:
                 self.addsent(test)
             if len(self.queue) > 0:
-                self.queue.reverse()
-                self.c.fsend(self.queue.pop())
-                self.queue.reverse()
+                self.c.fsend(self.queue.pop(0))
             else:
-                self.c.fsend("#")
+                self.c.fsend(empty)
             self.c.fsend(self.encounter)
             self.root.update()
-            if self.retrieve().strip("#") == "1":
+            if self.retrieve().strip(empty) == "1":
                 self.c.fsend(str(self.locx)+","+str(self.locy))
                 self.players = []
                 players = clean(self.retrieve()[1:-1].split("), "))
@@ -833,11 +821,22 @@ Import Commands:
                 for x in structures:
                         x = remparens(x[1:]).split(", ")
                         self.structures.append((float(x[0]), float(x[1]), float(x[2]), float(x[3])))
+        if self.server != None:
+            self.printdebug(":: "+str(len(self.agenda)))
+            todo = self.agenda
+            self.agenda = []
+            for wait, func in todo:
+                wait -= 1
+                if wait <= 0:
+                    self.register(func, 200)
+                else:
+                    self.agenda.append((wait, func))
             self.register(self.refresh, self.speed)
         if self.encounter == 1:
             self.render()
         elif self.encounter == -1:
             self.top.destroy()
+        self.printdebug("}")
 
     def render(self):
         for x in self.identifiers:
