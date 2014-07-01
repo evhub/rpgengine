@@ -67,7 +67,6 @@ Expressions:
 Console Commands:
     show <expression>
     help [string]
-    errors
     clear
     clean
 Character Commands:
@@ -95,9 +94,9 @@ Game Commands:
     wipe
     open
 Control Commands:
+    def <name> [:]= <expression>
     do <command>
     del <variable>
-    get [variable]
 Import Commands:
     <name> = import <file>
     run <file>
@@ -106,16 +105,13 @@ Import Commands:
     def __init__(self, override=False, sendroll=False, debug=False, speed=400, height=10):
         self.oldshow = lambda *args: mathbase.show(self, *args)
         self.debug = int(debug)
-        self.printdebug(": ON")
         self.speed = speed
         self.override = override
         self.sendroll = sendroll
         self.root, self.app, self.box = startconsole(self.handler, "Loading RPGEngine...", "RPGEngine", height)
         self.show = self.app.display
-        self.errorlog = {}
-        self.returned = 1
-        self.ans = [matrix(0)]
         self.populator()
+        self.printdebug(": ON")
         self.load()
         self.server = None
         self.turn = -1
@@ -341,10 +337,8 @@ Import Commands:
         self.cmds = [
             self.do_find,
             self.cmd_debug,
-            self.cmd_errors,
             self.cmd_clear,
             self.cmd_clean,
-            self.cmd_get,
             self.cmd_run,
             self.cmd_save,
             self.cmd_assert,
@@ -376,6 +370,7 @@ Import Commands:
             self.cmd_do,
             self.cmd_show,
             self.cmd_del,
+            self.cmd_def,
             self.cmd_set,
             self.cmd_normal
             ]
