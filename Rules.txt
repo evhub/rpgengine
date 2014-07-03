@@ -26,12 +26,12 @@ fort = fortitude
 refl = reflex
 
 # Class Defaults:
-proc("monk := 0") @! val("monk")
-proc("autochemist := 0") @! val("autochemist")
-proc("roboticist := 0") @! val("roboticist")
-proc("hybrid := 0") @! val("hybrid")
-proc("elementalist := 0") @! val("elementalist")
-proc("chemist := 0") @! val("chemist")
+proc("monk := 0") @! var("monk")
+proc("autochemist := 0") @! var("autochemist")
+proc("roboticist := 0") @! var("roboticist")
+proc("hybrid := 0") @! var("hybrid")
+proc("elementalist := 0") @! var("elementalist")
+proc("chemist := 0") @! var("chemist")
 
 # Monk Extras:
 flurry_bonus(x) = monk+-2@x<=1; monk+-7@x<=3; monk+-12@x<=5; monk+-17
