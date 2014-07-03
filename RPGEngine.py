@@ -330,12 +330,10 @@ Import Commands:
 
     def populator(self):
         self.pre_cmds = [
-            self.do_find,
             self.pre_help,
             self.pre_cmd
             ]
         self.cmds = [
-            self.do_find,
             self.cmd_debug,
             self.cmd_clear,
             self.cmd_clean,
