@@ -368,6 +368,7 @@ Import Commands:
             self.cmd_do,
             self.cmd_show,
             self.cmd_del,
+            self.cmd_make,
             self.cmd_def,
             self.cmd_set,
             self.cmd_normal
