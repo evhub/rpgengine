@@ -68,7 +68,6 @@ Console Commands:
     show <expression>
     help [string]
     clear
-    clean
 Character Commands:
     roll <modifier>
     deal <damage>
@@ -336,7 +335,6 @@ Import Commands:
         self.cmds = [
             self.cmd_debug,
             self.cmd_clear,
-            self.cmd_clean,
             self.cmd_run,
             self.cmd_save,
             self.cmd_assert,
