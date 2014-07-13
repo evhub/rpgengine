@@ -379,6 +379,7 @@ Import Commands:
         self.e = evaluator(processor=self)
         self.e.makevars({
             "print":funcfloat(self.printcall, self.e, "print"),
+            "show":funcfloat(self.showcall, self.e, "show"),
             "ans":funcfloat(self.anscall, self.e, "ans"),
             "grab":funcfloat(self.grabcall, self.e, "grab"),
             "name":"Guest",
