@@ -35,6 +35,7 @@ speed = 400
 # DATA AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+from __future__ import with_statement, absolute_import, print_function, unicode_literals
 from rabbit.all import *
 
 def customformat(inputstring):
@@ -364,7 +365,6 @@ Import Commands:
             self.cmd_scan,
 
             self.cmd_do,
-            self.cmd_show,
             self.cmd_del,
             self.cmd_make,
             self.cmd_def,
