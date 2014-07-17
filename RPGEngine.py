@@ -57,50 +57,6 @@ def remparens(inputstring):
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 class main(mathbase, serverbase):
-    helpstring = """Basic Commands:
-    <command> [;; <command> ;; <command>...]
-    <name> [:]= <expression>
-Expressions:
-    <item>, [<item>, <item>...]
-    <function> [:](<variables>)[:(<variables>):(<variables>)...]
-    <expression> [@<condition>[; <expression>@<condition>; <expression>@<condition>;... <expression>]]
-    "string"
-Console Commands:
-    show <expression>
-    help [string]
-    clear
-Character Commands:
-    roll <modifier>
-    deal <damage>
-    cast <level>
-    casts
-    rest
-    weapons
-    equip <weapon>
-    skills
-    status
-    character
-Game Commands:
-    join <port> <address>
-    host <port> <connections>
-    encounter
-    chat
-    username
-    disconnect
-    battle
-    done
-    hold
-    end
-    wipe
-    open
-Control Commands:
-    def <name> [:]= <expression>
-    do <command>
-    del <variable>
-Import Commands:
-    <name> = import <file>
-    run <file>
-    save <file>"""
 
     def __init__(self, override=False, sendroll=False, debug=False, speed=400, height=10):
         self.oldshow = lambda *args: mathbase.show(self, *args)
@@ -330,14 +286,12 @@ Import Commands:
 
     def populator(self):
         self.pre_cmds = [
-            self.pre_help,
             self.pre_cmd
             ]
         self.cmds = [
+            self.cmd_help,
             self.cmd_debug,
             self.cmd_clear,
-            self.cmd_run,
-            self.cmd_save,
             self.cmd_assert,
 
             self.cmd_skills,
@@ -372,12 +326,21 @@ Import Commands:
             self.cmd_normal
             ]
         self.set_cmds = [
-            self.set_import,
             self.set_def,
             self.set_normal
             ]
         self.e = evaluator(processor=self)
+        self.fresh(True)
+        self.genhelp()
+
+    def fresh(self, top=True):
+        """Refreshes The Environment."""
+        if not top:
+            self.e.fresh()
         self.e.makevars({
+            "run":funcfloat(self.runcall, self.e, "run"),
+            "save":funcfloat(self.savecall, self.e, "save"),
+            "install":funcfloat(self.installcall, self.e, "install"),
             "print":funcfloat(self.printcall, self.e, "print"),
             "show":funcfloat(self.showcall, self.e, "show"),
             "ans":funcfloat(self.anscall, self.e, "ans"),
