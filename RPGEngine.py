@@ -292,6 +292,7 @@ class main(mathbase, serverbase):
             self.cmd_help,
             self.cmd_debug,
             self.cmd_clear,
+            self.cmd_run,
             self.cmd_assert,
 
             self.cmd_skills,
@@ -338,7 +339,6 @@ class main(mathbase, serverbase):
         if not top:
             self.e.fresh()
         self.e.makevars({
-            "run":funcfloat(self.runcall, self.e, "run"),
             "save":funcfloat(self.savecall, self.e, "save"),
             "install":funcfloat(self.installcall, self.e, "install"),
             "print":funcfloat(self.printcall, self.e, "print"),
