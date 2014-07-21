@@ -364,10 +364,10 @@ class main(mathbase, serverbase):
             bonus = customformat(original)
             calcbonus = self.calc(bonus)
             if "matrix" in typestr(calcbonus):
-                toroll = "base_roll,"*calcbonus.y
+                toroll = "base_roll:,"*calcbonus.y
                 roll = self.calc(toroll[:-1])
             else:
-                roll = self.calc("base_roll")
+                roll = self.calc("base_roll:")
             rollstr = self.e.prepare(roll, False, True)
             self.app.display("Roll: "+rollstr)
             totalstr = self.e.prepare(roll+calcbonus, False, True)
@@ -626,8 +626,8 @@ class main(mathbase, serverbase):
     def battle(self):
         self.x = 0
         self.turn = 0
+        roll = self.calc("base_roll:")
         if self.server:
-            roll = self.calc("base_roll")
             self.app.display("Initiative Roll: "+self.e.prepare(roll, False, False))
             total = float(roll+self.calc("initiative"))
             self.app.display("Initiative Total: "+str(total))
@@ -644,7 +644,6 @@ class main(mathbase, serverbase):
             self.app.display("Beginning Battle...")
             self.register(self.rounds, 600)
         elif self.server != None:
-            roll = self.calc("base_roll")
             self.app.display("Initiative Roll: "+self.e.prepare(roll, False, False))
             total = str(float(roll+self.calc("initiative")))
             self.app.display("Initiative Total: "+total)
