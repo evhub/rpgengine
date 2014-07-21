@@ -116,15 +116,12 @@ We'll begin the advanced tutorial by covering some of the more complicated conso
 ```
 open						# This command will allow one extra player to join an in-progress game.
 								# NOTE: This command must be used by the host when not in a battle.
-errors						# This command will display a list of errors that were encountered upon previous executions of commands.
-show a						# This command will display the value of 'a' directly without attempting to calculate what it is.
-get							# This command will display a raw output of all the currently defined variables and functions.
 sin:(x)						# This command will display the sine of 'x'. The colon may be omitted.
 f(x) = x					# This command is used to create functions. This particular command can be read as 'f(x) = x'.
-f(x) =  -1*x@x<0;  x		# This command is used to define piecewise functions. This particular command can be read as 'f(x) = (-1*x if x<0) or (x if else)'.
-(0,1,2,3)~x~(x+1)			# This command will execute 'x+1' for when x is 0, 1, 2, and 3. The central ‘x~’ may be omitted.
+f(x) = -x@x<0;x				# This command is used to define piecewise functions. This particular command can be read as 'f(x) = (-1*x if x<0) or (x if else)'.
+0,1,2,3~\x\x+1				# This command will execute 'x+1' for when x is 0, 1, 2, and 3.
 run Extras.txt				# This command will run a file that contains commands.
-extras = import Extras.py	# This command will import a specially-written RPGEngine python add-on. Instructions for writing these add-ons can be found lower down.
+install Extras.py			# This command will import a specially-written RPGEngine python add-on.
 ```
 
 ### CHANGING OPTIONS:

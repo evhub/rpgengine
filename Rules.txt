@@ -5,7 +5,10 @@ rest_health = level
 # Attribute Options:
 ability_modifier(x) = floor:((x+-10)/2)
 
-str = ability_modifier:str_score
+# Strength should be str, old str will be set to string
+string := str
+def str = ability_modifier:str_score
+
 dex = ability_modifier:dex_score
 con = ability_modifier:con_score
 int = ability_modifier:int_score
