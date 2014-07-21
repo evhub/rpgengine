@@ -11,7 +11,11 @@ def str = ability_modifier:str_score
 
 dex = ability_modifier:dex_score
 con = ability_modifier:con_score
-int = ability_modifier:int_score
+
+# Intelligence should be int, old int will be set to integer
+integer := int
+def int = ability_modifier:int_score
+
 wis = ability_modifier:wis_score
 cha = ability_modifier:cha_score
 

@@ -19,6 +19,9 @@
 # CONFIG AREA:
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
+# WARNING: DO NOT MODIFY THIS LINE!
+from __future__ import with_statement, absolute_import, print_function, unicode_literals
+
 # Controls general debugging:
 debug = False
 
@@ -35,7 +38,6 @@ speed = 400
 # DATA AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-from __future__ import with_statement, absolute_import, print_function, unicode_literals
 from rabbit.all import *
 
 def customformat(inputstring):
@@ -59,13 +61,11 @@ def remparens(inputstring):
 class main(mathbase, serverbase):
 
     def __init__(self, override=False, sendroll=False, debug=False, speed=400, height=10):
-        self.oldshow = lambda *args: mathbase.show(self, *args)
         self.debug = int(debug)
         self.speed = speed
         self.override = override
         self.sendroll = sendroll
         self.root, self.app, self.box = startconsole(self.handler, "Loading RPGEngine...", "RPGEngine", height)
-        self.show = self.app.display
         self.populator()
         self.printdebug(": ON")
         self.load()
@@ -74,7 +74,7 @@ class main(mathbase, serverbase):
         self.x = -1
         self.talk = 0
         self.encounter = 0
-        if not self.evalfile("Rules.txt"):
+        if not self.saferun(self.evalfile, "Rules.txt"):
             popup("Error", "Error finding Rules.txt for import.")
             self.app.display("Unable to find Rules.txt for import.")
         if self.debug:
@@ -278,11 +278,11 @@ class main(mathbase, serverbase):
                 del self.atts[test[0]]
         return x
 
-    def show(self, arg):
-        if self.talk and isinstance(arg, strcalc):
+    def show(self, arg, top=False):
+        if self.talk and not top and isinstance(arg, strcalc):
             self.textmsg(": "+out)
         else:
-            self.oldshow(arg)
+            self.appshow(arg, top)
 
     def populator(self):
         self.pre_cmds = [
@@ -291,7 +291,6 @@ class main(mathbase, serverbase):
         self.cmds = [
             self.cmd_help,
             self.cmd_debug,
-            self.cmd_clear,
             self.cmd_run,
             self.cmd_assert,
 
@@ -345,9 +344,14 @@ class main(mathbase, serverbase):
             "show":funcfloat(self.showcall, self.e, "show"),
             "ans":funcfloat(self.anscall, self.e, "ans"),
             "grab":funcfloat(self.grabcall, self.e, "grab"),
-            "name":"Guest",
-            "status":"deal 0"
+            "clear":usefunc(self.clear, self.e, "clear", []),
+            "status":usefunc(self.status, self.e, "status", []),
+            "name":"Guest"
             })
+
+    def status(self):
+        """Wraps deal 0."""
+        self.cmd_deal("deal 0")
 
     def cmd_skills(self, original):
         if superformat(original) == "skills":
@@ -482,7 +486,7 @@ class main(mathbase, serverbase):
             self.server = False
             self.app.display("Connecting...")
             if len(original) > 1:
-                self.port, self.host = int(original[0]), original[1])
+                self.port, self.host = int(original[0]), original[1]
             else:
                 self.port, self.host = original[0], None
             self.talk = 1
