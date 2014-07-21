@@ -3,7 +3,7 @@ base_roll = 1d20
 rest_health = level
 
 # Attribute Options:
-ability_modifier(x) = floor:((x+-10)/2)
+ability_modifier(x) = floor:((x-10)/2)
 
 # Strength should be str, old str will be set to string
 string := str
@@ -41,8 +41,8 @@ proc("elementalist := 0") @! var("elementalist")
 proc("chemist := 0") @! var("chemist")
 
 # Monk Extras:
-flurry_bonus(x) = monk+-2@x<=1; monk+-7@x<=3; monk+-12@x<=5; monk+-17
-flurry_normal = attack+-1*bab
+flurry_bonus(x) = monk-2@x<=1; monk-7@x<=3; monk-12@x<=5; monk-17
+flurry_normal = attack-bab
 flurry_get(flurry_normal) = flurry_normal@len(bab)<=1; flurry_normal:0
 flurry_number(monk) = 0@monk?=0; 2@monk<=5; 3@monk<=7; 4@monk<=10; 5@monk?=11; 6@monk<=14; 7@monk?=15; 8@monk?=16; 9
 flurry(x) = range(0,flurry_number(monk)) ~ \x\(flurry_get(flurry_normal)+flurry_bonus(x))
@@ -87,8 +87,8 @@ potency = 0
 minutia(pints) = floor:(5-pints)@pints<5; 0
 wmd(pints) = 11@11/pints>11; 1@11/pints<1; floor:(11/pints)
 
-chemicals_damage = (floor:pints)d(potency*2)+(pints+-1*floor:pints)*potency
+chemicals_damage = (floor:pints)d(potency*2)+(pints-floor:pints)*potency
 chemicals_splash = chemicals_damage/1.5
 chemicals_radius = (potency+pints)*1.5
 chemicals_dc = 10+potency+pints/2
-chemicals_range = 25+-1/4*pints
+chemicals_range = 25-1/4*pints
