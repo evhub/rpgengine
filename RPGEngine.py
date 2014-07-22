@@ -301,6 +301,7 @@ class main(mathbase, serverbase):
             self.cmd_weapons,
             self.cmd_create,
             self.cmd_equip,
+            self.cmd_status,
             self.cmd_deal,
             self.cmd_cast,
             self.cmd_casts,
@@ -346,17 +347,13 @@ class main(mathbase, serverbase):
             "ans":funcfloat(self.anscall, self.e, "ans"),
             "grab":funcfloat(self.grabcall, self.e, "grab"),
             "clear":usefunc(self.clear, self.e, "clear", []),
-            "status":usefunc(self.status, self.e, "status", []),
             "name":"Guest"
             })
-
-    def status(self):
-        """Wraps deal 0."""
-        self.cmd_deal("deal 0")
 
     def cmd_skills(self, original):
         if superformat(original) == "skills":
             self.app.display("Skills: "+strlist(self.skills, ", "))
+            self.setreturned()
             return True
 
     def cmd_roll(self, original):
@@ -375,16 +372,19 @@ class main(mathbase, serverbase):
             self.saferun(self.app.display, "Total: "+totalstr)
             if self.sendroll:
                 self.textmsg(" rolled "+rollstr+" + "+bonus+" = "+totalstr)
+            self.setreturned()
             return True
 
     def cmd_character(self, original):
         if superformat(original) == "character":
             popup("Info", self.character())
+            self.setreturned()
             return True
 
     def cmd_weapons(self, original):
         if superformat(original) == "weapons":
             self.app.display(self.weapons())
+            self.setreturned()
             return True
 
     def cmd_create(self, original):
@@ -393,6 +393,7 @@ class main(mathbase, serverbase):
             self.weps.append(original[0])
             self.e.variables[original[0]+"_attack"] = self.e.prepare(self.calc(original[1]), False, True)
             self.e.variables[original[0]+"_attack"] = self.e.prepare(self.calc(original[2]), False, True)
+            self.setreturned()
             return True
 
     def cmd_equip(self, original):
@@ -408,6 +409,13 @@ class main(mathbase, serverbase):
             else:
                 self.e.variables["attack"] = name+"_attack"
                 self.e.variables["damage"] = name+"_damage"
+            self.setreturned()
+            return True
+
+    def cmd_status(self):
+        """Wraps deal 0."""
+        if superformat(original) == "status":
+            self.cmd_deal("deal 0")
             return True
 
     def cmd_deal(self, original):
@@ -430,6 +438,7 @@ class main(mathbase, serverbase):
             self.app.display(outstring)
             if pop:
                 popup("Info", pop)
+            self.setreturned()
             return True
 
     def cmd_cast(self, original):
@@ -443,6 +452,7 @@ class main(mathbase, serverbase):
                 else:
                     self.e.variables["level_"+original+"_casts"] = self.e.prepare(self.calc("level_"+original+"_casts+-1"), False, True)
                     self.app.display("Level "+original+" Casts Used: "+str(self.e.variables["level_"+original+"_casts"])+"/"+str(self.e.variables["level_"+original+"_maxcasts"]))
+            self.setreturned()
             return True
 
     def cmd_casts(self, original):
@@ -458,6 +468,7 @@ class main(mathbase, serverbase):
                     except:
                         error = 1
                     level += 1
+            self.setreturned()
             return True
 
     def cmd_rest(self, original):
@@ -471,6 +482,7 @@ class main(mathbase, serverbase):
                     except:
                         error = 1
                     level += 1
+            self.setreturned()
             self.process("deal -1*rest_health")
             return True
 
@@ -478,6 +490,7 @@ class main(mathbase, serverbase):
         if superformat(original) == "reload":
             self.load()
             self.app.display("Enter A Command:")
+            self.setreturned()
             return True
 
     def cmd_join(self, original):
@@ -493,6 +506,7 @@ class main(mathbase, serverbase):
             self.talk = 1
             self.name = self.e.find("name", False, True)
             self.register(self.connect, 200)
+            self.setreturned()
             return True
 
     def cmd_host(self, original):
@@ -509,6 +523,7 @@ class main(mathbase, serverbase):
             self.talk = 1
             self.names = {None: self.e.find("name", False, True)}
             self.register(self.connect, 200)
+            self.setreturned()
             return True
 
     def cmd_encounter(self, original):
@@ -520,6 +535,7 @@ class main(mathbase, serverbase):
                 self.sync()
                 self.app.display("Launching game...")
                 self.gui()
+            self.setreturned()
             return True
 
     def cmd_disconnect(self, original):
@@ -528,6 +544,7 @@ class main(mathbase, serverbase):
                 self.app.display("You can't use that right now.")
             else:
                 self.disconnect()
+            self.setreturned()
             return True
 
     def cmd_battle(self, original):
@@ -536,6 +553,7 @@ class main(mathbase, serverbase):
                 self.app.display("You can't use that right now.")
             else:
                 self.battle()
+            self.setreturned()
             return True
 
     def cmd_open(self, original):
@@ -547,6 +565,7 @@ class main(mathbase, serverbase):
                 self.app.display("Connection added.")
             else:
                 self.app.display("You can't use that right now.")
+            self.setreturned()
             return True
 
     def cmd_hold(self, original):
@@ -562,6 +581,7 @@ class main(mathbase, serverbase):
                 self.turn = 0
             else:
                 self.app.display("You can't use that right now.")
+            self.setreturned()
             return True
 
     def cmd_done(self, original):
@@ -573,6 +593,7 @@ class main(mathbase, serverbase):
                 self.turn = 0
             else:
                 self.app.display("You can't use that right now.")
+            self.setreturned()
             return True
 
     def cmd_wipe(self, original):
@@ -581,6 +602,7 @@ class main(mathbase, serverbase):
                 self.structures = []
             else:
                 self.app.display("You can't use that right now.")
+            self.setreturned()
             return True
 
     def cmd_end(self, original):
@@ -590,6 +612,7 @@ class main(mathbase, serverbase):
                 self.x = -2
             else:
                 self.app.display("You can't use that right now.")
+            self.setreturned()
             return True
 
     def cmd_chat(self, original):
@@ -603,6 +626,7 @@ class main(mathbase, serverbase):
                 else:
                     self.talk = 1
                     self.app.display("Chat turned on.")
+            self.setreturned()
             return True
 
     def cmd_scan(self, original):
@@ -616,6 +640,7 @@ class main(mathbase, serverbase):
                 self.app.display("RESULTS PRINTED TO CONSOLE.")
             else:
                 self.app.display("This command is only available in debug mode.")
+            self.setreturned()
             return True
 
     def convert(self, x, y):
