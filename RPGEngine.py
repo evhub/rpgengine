@@ -62,6 +62,7 @@ class main(mathbase, serverbase):
 
     def __init__(self, override=False, sendroll=False, debug=False, speed=400, height=10):
         self.debug = int(debug)
+        self.startup()
         self.speed = speed
         self.override = override
         self.sendroll = sendroll
