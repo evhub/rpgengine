@@ -293,6 +293,7 @@ class main(mathbase, serverbase):
             self.cmd_help,
             self.cmd_debug,
             self.cmd_run,
+            self.cmd_assert,
 
             self.cmd_skills,
             self.cmd_roll,
