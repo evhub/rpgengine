@@ -51,8 +51,32 @@ def customformat(inputstring):
         outstring += x+","
     return outstring[:-1]
 
-def remparens(inputstring):
-    return inputstring.replace("(","").replace(")","").replace("[","").replace("]","")
+engnum_maps = {
+    0: "zero",
+    1: "one",
+    2: "two",
+    3: "three",
+    4: "four",
+    5: "five",
+    6: "six",
+    7: "seven",
+    8: "eight",
+    9: "nine",
+    10: "ten",
+    11: "eleven",
+    12: "twelve",
+    13: "thirteen",
+    14: "fourteen",
+    15: "fifteen",
+    16: "sixteen",
+    17: "seventeen",
+    18: "eighteen",
+    19: "nineteen",
+    20: "twenty"
+    }
+def engnum(inputnum):
+    """Gets The English For A Number."""
+    return engnum_maps[getint(inputnum)]
 
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # CODE AREA: (IMPORTANT: DO NOT MODIFY THIS SECTION!)
@@ -61,14 +85,12 @@ def remparens(inputstring):
 class main(mathbase, serverbase):
 
     def __init__(self, override=False, sendroll=False, debug=False, speed=400, height=10):
-        self.debug = int(debug)
-        self.startup()
+        self.startup(debug)
         self.speed = speed
         self.override = override
         self.sendroll = sendroll
         self.root, self.app, self.box = startconsole(self.handler, "Loading RPGEngine...", "RPGEngine", height)
         self.populator()
-        self.printdebug(": ON")
         self.load()
         self.server = None
         self.turn = -1
@@ -78,21 +100,7 @@ class main(mathbase, serverbase):
         if not self.saferun(self.evalfile, "Rules.txt"):
             popup("Error", "Error finding Rules.txt for import.")
             self.app.display("Unable to find Rules.txt for import.")
-        if self.debug:
-            self.debugvariables = globals()
-            self.debugvariables.update(self.__dict__)
-            self.debugvariables.update(locals())
         self.app.display("Enter A Command:")
-
-    def setdebug(self, state):
-        """Sets The Debugging State."""
-        self.e.debug = True
-        if self.debug:
-            self.e.printdebug(": OFF")
-        else:
-            self.e.printdebug(": ON")
-        self.debug = int(state)
-        self.e.debug = self.debug
 
     def load(self):
         if self.debug:
@@ -114,6 +122,9 @@ class main(mathbase, serverbase):
                 self.app.display("Unable to load PC.txt for import.")
             else:
                 self.app.display("Successfully imported PC.txt.")
+
+    def remparens(self, inputstring):
+        return delspace(inputstring, strlist(self.e.groupers.keys()+self.e.groupers.values(), ""))
 
     def fromsheet(self, base):
         lines = base.splitlines()
@@ -245,9 +256,10 @@ class main(mathbase, serverbase):
                         spells = groups[x][z].split("	")[1:]
                         i = 0
                         for casts in spells:
+                            istr = engnum(i)
                             casts = customformat(casts)
-                            self.e.variables["level_"+str(i)+"_maxcasts"] = casts
-                            self.e.variables["level_"+str(i)+"_casts"] = casts
+                            self.e.variables["level_"+istr+"_maxcasts"] = casts
+                            self.e.variables["level_"+istr+"_casts"] = casts
                             i += 1
                         self.spellcaster = 1
                         break
@@ -285,363 +297,317 @@ class main(mathbase, serverbase):
         else:
             self.appshow(arg, top)
 
-    def populator(self):
-        self.pre_cmds = [
-            self.pre_cmd
-            ]
-        self.cmds = [
-            self.cmd_help,
-            self.cmd_debug,
-            self.cmd_run,
-            self.cmd_assert,
-
-            self.cmd_skills,
-            self.cmd_roll,
-            self.cmd_character,
-            self.cmd_weapons,
-            self.cmd_create,
-            self.cmd_equip,
-            self.cmd_status,
-            self.cmd_deal,
-            self.cmd_cast,
-            self.cmd_casts,
-            self.cmd_rest,
-            self.cmd_reload,
-            self.cmd_join,
-            self.cmd_host,
-            self.cmd_encounter,
-            self.cmd_disconnect,
-            self.cmd_battle,
-            self.cmd_open,
-            self.cmd_hold,
-            self.cmd_done,
-            self.cmd_wipe,
-            self.cmd_end,
-            self.cmd_chat,
-            self.cmd_scan,
-
-            self.cmd_do,
-            self.cmd_del,
-            self.cmd_make,
-            self.cmd_def,
-            self.cmd_set,
-            self.cmd_normal
-            ]
-        self.set_cmds = [
-            self.set_def,
-            self.set_normal
-            ]
-        self.e = evaluator(processor=self)
-        self.fresh(True)
-        self.genhelp()
-
     def fresh(self, top=True):
         """Refreshes The Environment."""
         if not top:
             self.e.fresh()
         self.e.makevars({
+            "debug":funcfloat(self.debugcall, self.e, "debug"),
+            "run":funcfloat(self.runcall, self.e, "run"),
+            "assert":funcfloat(self.assertcall, self.e, "assert"),
+            "make":funcfloat(self.makecall, self.e, "make"),
             "save":funcfloat(self.savecall, self.e, "save"),
             "install":funcfloat(self.installcall, self.e, "install"),
             "print":funcfloat(self.printcall, self.e, "print"),
             "show":funcfloat(self.showcall, self.e, "show"),
             "ans":funcfloat(self.anscall, self.e, "ans"),
             "grab":funcfloat(self.grabcall, self.e, "grab"),
-            "clear":usefunc(self.clear, self.e, "clear", []),
-            "name":"Guest"
+            "clear":usefunc(self.clear, self.e, "clear"),
+            "name":"Guest",
+            "skills":usefunc(self.skills, self.e, "skills"),
+            "roll":funcfloat(self.rollcall, self.e, "roll"),
+            "character":usefunc(self.show_character, self.e, "character"),
+            "weapons":usefunc(self.show_weapons, self.e, "weapons"),
+            "create":funcfloat(self.createcall, self.e, "create"),
+            "equip":funcfloat(self.equipcall, self.e, "equip"),
+            "status":usefunc(self.status, self.e, "status"),
+            "deal":funcfloat(self.dealcall, self.e, "deal"),
+            "cast":funcfloat(self.castcall, self.e, "cast"),
+            "casts":usefunc(self.show_casts, self.e, "casts"),
+            "rest":usefunc(self.do_rest, self.e, "rest"),
+            "reload":usefunc(self.do_reload, self.e, "reload"),
+            "client":funcfloat(self.clientcall, self.e, "client"),
+            "host":funcfloat(self.hostcall, self.e, "host"),
+            "encounter":usefunc(self.do_encounter, self.e, "encounter"),
+            "disconnect":usefunc(self.do_disconnect, self.e, "disconnect"),
+            "battle":usefunc(self.do_battle, self.e, "battle"),
+            "addclient":usefunc(self.do_addclient, self.e, "addclient"),
+            "hold":usefunc(self.do_hold, self.e, "hold"),
+            "done":usefunc(self.do_done, self.e, "done"),
+            "wipe":usefunc(self.do_wipe, self.e, "wipe"),
+            "end":usefunc(self.do_end, self.e, "end"),
+            "chat":usefunc(self.do_chat, self.e, "chat")
             })
 
-    def cmd_skills(self, original):
-        if superformat(original) == "skills":
-            self.app.display("Skills: "+strlist(self.skills, ", "))
-            self.setreturned()
-            return True
+    def skills(self):
+        self.app.display("Skills: "+strlist(self.skills, ", "))
+        self.setreturned()
 
-    def cmd_roll(self, original):
-        if superformat(original).startswith("roll "):
-            original = self.e.find(original[5:])
-            bonus = customformat(original)
-            calcbonus = self.calc(bonus)
-            if "matrix" in typestr(calcbonus):
-                toroll = "base_roll:,"*calcbonus.y
-                roll = self.calc(toroll[:-1])
-            else:
-                roll = self.calc("base_roll:")
-            rollstr = self.e.prepare(roll, False, True)
-            self.app.display("Roll: "+rollstr)
-            totalstr = self.e.prepare(roll+calcbonus, False, True)
-            self.saferun(self.app.display, "Total: "+totalstr)
-            if self.sendroll:
-                self.textmsg(" rolled "+rollstr+" + "+bonus+" = "+totalstr)
-            self.setreturned()
-            return True
+    def rollcall(self, variables):
+        if not variables:
+            calcbonus = 0.0
+        elif len(variables) == 1:
+            calcbonus = variables[0]
+        else:
+            calcbonus = diagmatrixlist(variables)
+        if isinstance(calcbonus, matrix):
+            toroll = "base_roll(),"*calcbonus.y
+            roll = self.e.calc(toroll[:-1])
+        else:
+            roll = self.e.calc("base_roll()")
+        rollstr = self.e.prepare(roll, False, True)
+        total = roll+calcbonus
+        totalstr = self.e.prepare(total, False, True)
+        self.app.display("Roll: "+rollstr)
+        self.app.display("Total: "+totalstr)
+        if self.sendroll:
+            self.textmsg(" rolled "+rollstr+" + "+bonus+" = "+totalstr)
+        self.setreturned()
+        return total
 
-    def cmd_character(self, original):
-        if superformat(original) == "character":
-            popup("Info", self.character())
-            self.setreturned()
-            return True
+    def show_character(self):
+        popup("Info", self.character())
+        self.setreturned()
 
-    def cmd_weapons(self, original):
-        if superformat(original) == "weapons":
-            self.app.display(self.weapons())
-            self.setreturned()
-            return True
+    def show_weapons(self, original):
+        self.app.display(self.weapons())
+        self.setreturned()
 
-    def cmd_create(self, original):
-        if superformat(original).startswith("create "):
-            original = original[7:].split(" ")
-            self.weps.append(original[0])
-            self.e.variables[original[0]+"_attack"] = self.e.prepare(self.calc(original[1]), False, True)
-            self.e.variables[original[0]+"_attack"] = self.e.prepare(self.calc(original[2]), False, True)
+    def createcall(self, variables):
+        if len(variables) < 3:
+            raise ExecutionError("ArgumentError", "Not enough arguments to create")
+        elif len(variables) == 3:
+            name = self.e.prepare(variables[0], False, False)
+            self.weps.append(name)
+            self.e.variables[name+"_attack"] = variables[1]
+            self.e.variables[name+"_attack"] = variables[2]
             self.setreturned()
-            return True
+        else:
+            raise ExecutionError("ArgumentError", "Too many arguments to create")
 
-    def cmd_equip(self, original):
-        if superformat(original).startswith("equip "):
-            original = original[6:]
-            original = original.split(":")
-            name = original[0]
+    def equipcall(self, variables):
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to equip")
+        elif len(variables) < 3:
+            name = self.e.prepare(variables[0], False, False)
             self.e.variables["critrange"] = name+"_critrange"
             self.e.variables["crittimes"] = name+"_crittimes"
             if len(original) > 1:
-                self.e.variables["attack"] = name+"_attack_"+original[1]
-                self.e.variables["damage"] = name+"_damage_"+original[1]
+                variant = self.e.prepare(variables[1], False, False)
+                self.e.variables["attack"] = name+"_attack_"+variant
+                self.e.variables["damage"] = name+"_damage_"+variant
             else:
                 self.e.variables["attack"] = name+"_attack"
                 self.e.variables["damage"] = name+"_damage"
             self.setreturned()
-            return True
+        else:
+            raise ExecutionError("ArgumentError", "Too many arguments to equip")
 
-    def cmd_status(self):
-        """Wraps deal 0."""
-        if superformat(original) == "status":
-            self.cmd_deal("deal 0")
-            return True
+    def status(self):
+        self.dealcall([0.0])
 
-    def cmd_deal(self, original):
-        if superformat(original).startswith("deal "):
-            original = original[5:]
-            self.e.variables["hp"] = self.calc(self.e.prepare(self.e.variables["hp"], False, True)+"+-1*"+self.e.prepare(self.calc(customformat(original)), False, True))
-            if float(self.calc(self.e.variables["hp"])) > float(self.calc(self.e.variables["maxhp"])):
-                self.e.variables["hp"] = self.e.variables["maxhp"]
-            self.app.display("HP: "+str(self.e.variables["hp"])+"/"+str(self.e.variables["maxhp"]))
-            pop = False
-            outstring = "Status: "
-            hp = float(self.calc(self.e.variables["hp"]))
-            if hp < -1.0*float(self.calc(self.e.variables["con_score"])):
-                outstring += "Dead"
-                pop = "You're Dead!"
-            elif hp <= 0:
-                outstring += "Unconscious"
-            else:
-                outstring += "Conscious"
-            self.app.display(outstring)
-            if pop:
-                popup("Info", pop)
-            self.setreturned()
-            return True
+    def dealcall(self, variables):
+        if istext(self.e.variables["hp"]):
+            self.e.variables["hp"] = self.e.calc(self.e.variables["hp"])
+        self.e.variables["hp"] -= self.e.funcs.sumcall(variables)
+        if istext(self.e.variables["maxhp"]):
+            self.e.variables["maxhp"] = self.e.calc(self.e.variables["maxhp"])
+        if self.e.variables["hp"] > self.e.variables["maxhp"]:
+            self.e.variables["hp"] = self.e.variables["maxhp"]
+        self.app.display("HP: "+self.e.prepare(self.e.variables["hp"], False, True)+"/"+self.e.prepare(self.e.variables["maxhp"], False, True))
+        pop = False
+        outstring = "Status: "
+        if istext(self.e.variables["con_score"]):
+            self.e.variables["con_score"] = self.e.calc(self.e.variables["con_score"])
+        if self.e.variables["hp"] < -1.0*self.e.variables["con_score"]:
+            outstring += "Dead"
+            pop = "You're Dead!"
+        elif self.e.variables["hp"] <= 0:
+            outstring += "Unconscious"
+        else:
+            outstring += "Conscious"
+        self.app.display(outstring)
+        if pop:
+            popup("Info", pop)
+        self.setreturned()
 
-    def cmd_cast(self, original):
-        if superformat(original).startswith("cast "):
-            original = original[5:]
+    def castcall(self, variables):
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to cast")
+        elif len(variables) == 1:
             if self.spellcaster == 0:
                 self.app.display("You're not a spellcaster!")
             else:
-                if float(self.calc(self.e.variables["level_"+original+"_casts"])) <= 0:
-                    self.app.display("You're out of "+original+" level casts!")
+                if isnum(variables[0]):
+                    original = engnum(variables[0])
                 else:
-                    self.e.variables["level_"+original+"_casts"] = self.e.prepare(self.calc("level_"+original+"_casts+-1"), False, True)
-                    self.app.display("Level "+original+" Casts Used: "+str(self.e.variables["level_"+original+"_casts"])+"/"+str(self.e.variables["level_"+original+"_maxcasts"]))
+                    original = self.e.prepare(variables[0], False, False)
+                if self.e.isreserved(original):
+                    raise ValueError("Invalid part of a variable name "+original)
+                elif getnum(self.e.calc(self.e.variables["level_"+original+"_casts"])) <= 0:
+                    self.app.display("You're out of level "+original+" casts!")
+                else:
+                    self.e.variables["level_"+original+"_casts"] = self.e.calc("level_"+original+"_casts-1")
+                    self.app.display("Level "+original+" Casts Used: "+self.e.prepare(self.e.variables["level_"+original+"_casts"], False, True)+"/"+self.e.prepare(self.e.variables["level_"+original+"_maxcasts"], False, True))
             self.setreturned()
-            return True
+        else:
+            for arg in variables:
+                self.castcall([arg])
 
-    def cmd_casts(self, original):
-        if superformat(original) == "casts":
-            if self.spellcaster == 0:
-                self.app.display("You're not a spellcaster!")
-            else:
-                error = 0
-                level = 0
-                while error == 0:
-                    try:
-                        self.app.display("Level "+str(level)+" Casts Used: "+str(self.e.variables["level_"+str(level)+"_casts"])+"/"+str(self.e.variables["level_"+str(level)+"_maxcasts"]))
-                    except:
-                        error = 1
-                    level += 1
+    def show_casts(self):
+        if self.spellcaster == 0:
+            self.app.display("You're not a spellcaster!")
+        else:
+            error = 0
+            level = 0
+            while error == 0:
+                name = engnum(level)
+                try:
+                    self.app.display("Level "+name+" Casts Used: "+self.e.prepare(self.e.variables["level_"+name+"_casts"], False, True)+"/"+self.e.prepare(self.e.variables["level_"+name+"_maxcasts"], False, True))
+                except:
+                    error = 1
+                level += 1
+        self.setreturned()
+
+    def do_rest(self):
+        if self.spellcaster == 1:
+            error = 0
+            level = 0
+            while error == 0:
+                name = engnum(level)
+                try:
+                    self.e.variables["level_"+name+"_casts"] = self.e.variables["level_"+name+"_maxcasts"]
+                except:
+                    error = 1
+                level += 1
+        self.setreturned()
+        self.dealcall([self.e.calc("-1*rest_health")])
+
+    def do_reload(self):
+        self.load()
+        self.setreturned()
+        self.app.display("Enter A Command:")
+
+    def clientcall(self, variables):
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to client")
+        elif len(variables) < 3:
             self.setreturned()
-            return True
-
-    def cmd_rest(self, original):
-        if superformat(original) == "rest":
-            if self.spellcaster == 1:
-                error = 0
-                level = 0
-                while error == 0:
-                    try:
-                        self.e.variables["level_"+str(level)+"_casts"] = self.e.variables["level_"+str(level)+"_maxcasts"]
-                    except:
-                        error = 1
-                    level += 1
-            self.setreturned()
-            self.process("deal -1*rest_health")
-            return True
-
-    def cmd_reload(self, original):
-        if superformat(original) == "reload":
-            self.load()
-            self.app.display("Enter A Command:")
-            self.setreturned()
-            return True
-
-    def cmd_join(self, original):
-        if superformat(original).startswith("join "):
-            original = original[5:]
-            original = original.split(" ", 1)
-            self.server = False
             self.app.display("Connecting...")
-            if len(original) > 1:
-                self.port, self.host = int(original[0]), original[1]
+            self.port = getint(variables[0])
+            if len(variables) > 1:
+                self.host = self.e.prepare(variables[1], False, False)
             else:
-                self.port, self.host = original[0], None
+                self.host = None
+            self.server = False
             self.talk = 1
             self.name = self.e.find("name", False, True)
             self.register(self.connect, 200)
-            self.setreturned()
-            return True
+        else:
+            raise ExecutionError("ArgumentError", "Too many arguments to client")
 
-    def cmd_host(self, original):
-        if superformat(original).startswith("host "):
-            original = original[5:]
-            original = original.split(" ", 1)
-            self.server = True
+    def hostcall(self, variables):
+        if not variables:
+            raise ExecutionError("ArgumentError", "Not enough arguments to host")
+        elif len(variables) < 3:
+            self.setreturned()
             self.app.display("Waiting for connections...")
-            self.port = int(original[0])
-            if len(original) < 2:
-                self.number = 1
+            self.port = getint(variables[0])
+            if len(original) > 1:
+                self.number = getint(variables[1])
             else:
-                self.number = int(original[1])
+                self.number = 1
+            self.server = True
             self.talk = 1
             self.names = {None: self.e.find("name", False, True)}
             self.register(self.connect, 200)
-            self.setreturned()
-            return True
+        else:
+            raise ExecutionError("ArgumentError", "Too many arguments to host")
 
-    def cmd_encounter(self, original):
-        if superformat(original) == "encounter":
-            if self.encounter != 0 or self.server == None:
-                self.app.display("You can't use that right now.")
-            else:
-                self.app.display("Waiting for other players...")
-                self.sync()
-                self.app.display("Launching game...")
-                self.gui()
-            self.setreturned()
-            return True
+    def do_encounter(self):
+        if self.encounter != 0 or self.server == None:
+            self.app.display("You can't use that right now.")
+        else:
+            self.app.display("Waiting for other players...")
+            self.sync()
+            self.app.display("Launching game...")
+            self.gui()
+        self.setreturned()
 
-    def cmd_disconnect(self, original):
-        if superformat(original) == "disconnect":
+    def do_disconnect(self):
+        self.setreturned()
+        if self.server == None:
+            self.app.display("You can't use that right now.")
+        else:
+            self.disconnect()
+
+    def do_battle(self):
+        if self.server == None or self.x >= 0:
+            self.app.display("You can't use that right now.")
+        else:
+            self.battle()
+        self.setreturned()
+
+    def do_addclient(self):
+        self.setreturned()
+        if self.server and self.x < 0:
+            self.number += 1
+            self.app.display("Waiting for a connection...")
+            self.c.add()
+            self.app.display("Connection added.")
+        else:
+            self.app.display("You can't use that right now.")
+
+    def do_hold(self):
+        self.setreturned()
+        if self.server == False and self.turn == 1:
+            self.queue.append("0")
+            self.turn = 0
+        elif self.server and self.turn == 2:
+            for x in xrange(0, len(self.order)-1):
+                if self.order[x] == None:
+                    self.order[x] = self.order[x+1]
+                    self.order[x+1] = None
+            self.turn = 0
+        else:
+            self.app.display("You can't use that right now.")
+
+    def do_done(self):
+        self.setreturned()
+        if self.server == False and self.turn == 1:
+            self.queue.append("1")
+            self.turn = 0
+        elif self.server and self.turn == 2:
+            self.turn = 0
+        else:
+            self.app.display("You can't use that right now.")
+
+    def do_wipe(self):
+        if self.server and self.turn == 2:
+            self.structures = []
+        else:
+            self.app.display("You can't use that right now.")
+        self.setreturned()
+
+    def do_end(self):
+        if self.server and self.turn == 2:
+            self.turn = 0
+            self.x = -2
+        else:
+            self.app.display("You can't use that right now.")
+        self.setreturned()
+
+    def do_chat(self):
+        if self.talk == 1:
+            self.talk = 0
+            self.app.display("Chat turned off.")
+        elif self.talk == 0:
             if self.server == None:
                 self.app.display("You can't use that right now.")
             else:
-                self.disconnect()
-            self.setreturned()
-            return True
-
-    def cmd_battle(self, original):
-        if superformat(original) == "battle":
-            if self.server == None or self.x >= 0:
-                self.app.display("You can't use that right now.")
-            else:
-                self.battle()
-            self.setreturned()
-            return True
-
-    def cmd_open(self, original):
-        if superformat(original) == "open":
-            if self.server and self.x < 0:
-                self.number += 1
-                self.app.display("Waiting for a connection...")
-                self.c.add()
-                self.app.display("Connection added.")
-            else:
-                self.app.display("You can't use that right now.")
-            self.setreturned()
-            return True
-
-    def cmd_hold(self, original):
-        if superformat(original) == "hold":
-            if self.server == False and self.turn == 1:
-                self.queue.append("0")
-                self.turn = 0
-            elif self.server and self.turn == 2:
-                for x in xrange(0, len(self.order)-1):
-                    if self.order[x] == None:
-                        self.order[x] = self.order[x+1]
-                        self.order[x+1] = None
-                self.turn = 0
-            else:
-                self.app.display("You can't use that right now.")
-            self.setreturned()
-            return True
-
-    def cmd_done(self, original):
-        if superformat(original) == "done":
-            if self.server == False and self.turn == 1:
-                self.queue.append("1")
-                self.turn = 0
-            elif self.server and self.turn == 2:
-                self.turn = 0
-            else:
-                self.app.display("You can't use that right now.")
-            self.setreturned()
-            return True
-
-    def cmd_wipe(self, original):
-        if superformat(original) == "wipe":
-            if self.server and self.turn == 2:
-                self.structures = []
-            else:
-                self.app.display("You can't use that right now.")
-            self.setreturned()
-            return True
-
-    def cmd_end(self, original):
-        if superformat(original) == "end":
-            if self.server and self.turn == 2:
-                self.turn = 0
-                self.x = -2
-            else:
-                self.app.display("You can't use that right now.")
-            self.setreturned()
-            return True
-
-    def cmd_chat(self, original):
-        if superformat(original) == "chat":
-            if self.talk == 1:
-                self.talk = 0
-                self.app.display("Chat turned off.")
-            elif self.talk == 0:
-                if self.server == None:
-                    self.app.display("You can't use that right now.")
-                else:
-                    self.talk = 1
-                    self.app.display("Chat turned on.")
-            self.setreturned()
-            return True
-
-    def cmd_scan(self, original):
-        if superformat(original) == "scan":
-            if self.debug:
-                self.app.display("SCANNING MEMORY...")
-                self.debugvariables.update(globals())
-                self.debugvariables.update(self.__dict__)
-                self.debugvariables.update(locals())
-                scan(self.debugvariables)
-                self.app.display("RESULTS PRINTED TO CONSOLE.")
-            else:
-                self.app.display("This command is only available in debug mode.")
-            self.setreturned()
-            return True
+                self.talk = 1
+                self.app.display("Chat turned on.")
+        self.setreturned()
 
     def convert(self, x, y):
         return self.width/2 + (x+1)*self.xsize, self.height/2 - (y-1)*self.ysize
@@ -652,10 +618,10 @@ class main(mathbase, serverbase):
     def battle(self):
         self.x = 0
         self.turn = 0
-        roll = self.calc("base_roll:")
+        roll = self.e.calc("base_roll:")
         if self.server:
             self.app.display("Initiative Roll: "+self.e.prepare(roll, False, False))
-            total = float(roll+self.calc("initiative"))
+            total = float(roll+self.e.calc("initiative"))
             self.app.display("Initiative Total: "+str(total))
             self.app.display("Getting Initiatives...")
             inits = self.receive()
@@ -671,7 +637,7 @@ class main(mathbase, serverbase):
             self.register(self.rounds, 600)
         elif self.server != None:
             self.app.display("Initiative Roll: "+self.e.prepare(roll, False, False))
-            total = str(float(roll+self.calc("initiative")))
+            total = str(float(roll+self.e.calc("initiative")))
             self.app.display("Initiative Total: "+total)
             self.queue.append(total)
             self.register(self.idle, 600)
@@ -794,17 +760,17 @@ class main(mathbase, serverbase):
                 self.players = []
                 players = clean(self.retrieve()[1:-1].split("), "))
                 for x in players:
-                    x = remparens(x[1:]).split(", ")
+                    x = self.remparens(x[1:]).split(", ")
                     self.players.append((int(x[0]), int(x[1])))
                 self.enemies = []
                 enemies = clean(self.retrieve()[1:-1].split("), "))
                 for x in enemies:
-                    x = remparens(x[1:]).split(", ")
+                    x = self.remparens(x[1:]).split(", ")
                     self.enemies.append((int(x[0]), int(x[1])))
                 self.structures = []
                 structures = clean(self.retrieve()[1:-1].split("), "))
                 for x in structures:
-                        x = remparens(x[1:]).split(", ")
+                        x = self.remparens(x[1:]).split(", ")
                         self.structures.append((float(x[0]), float(x[1]), float(x[2]), float(x[3])))
         if self.server != None:
             self.printdebug(":: "+str(len(self.agenda)))

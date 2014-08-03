@@ -16,7 +16,7 @@ The console is very powerful. It can do dynamic mathematical calculations, make 
 a = b*2		# The console can be used to set or change variables. A command of this form will set the variable 'a' to the value 'b' times two.
 a+1			# This command will print the value of 'a' plus one to the console. This form of command can be used to implement a variety of mathematical operations.
 2d6:+1		# The console is fully able to implement basic dice shorthand, but either a colon or open and close parentheses must be used. This command will evaluate to the result of the 2d6 plus one.
-roll a		# This command will make a roll (default d20) and add the value of 'a' to it. Both the base roll and the total will be shown.
+roll: a		# This command will make a roll (default d20) and add the value of 'a' to it. Both the base roll and the total will be shown.
 ```
 
 ### IMPORTING A PC:
@@ -42,44 +42,44 @@ stealth		# All your usable skills are loaded.
 
 Once you have imported a PC a whole new suite of commands are available to you. Here is a list of some of them and how to use them:
 ```
-deal a		# This will cause your character to take 'a' damage. RPGEngine will keep track of your health.
-				# NOTE: Type 'status' to display your health without using this command.
-cast 2		# This will use up one of your level '2' spell slots.
-				# NOTE: Type 'casts' for a list of all your casts.
-rest		# This will restore your spell slots and a portion of your health (default is your level).
-character	# This will display a basic summary of your character
-				# NOTE: Type 'skills' to display your skills.
+deal: a		# This will cause your character to take 'a' damage. RPGEngine will keep track of your health.
+				# NOTE: Type 'status:' to display your health without using this command.
+cast: 2		# This will use up one of your level '2' spell slots.
+				# NOTE: Type 'casts:' for a list of all your casts.
+rest:		# This will restore your spell slots and a portion of your health (default is your level).
+character:	# This will display a basic summary of your character
+				# NOTE: Type 'skills:' to display your skills.
 ```
 
 ### EQUIPPING WEAPONS:
 Upon loading in your PC you will notice that the variables 'attack' and 'damage' are left undefined. That is because the program doesn't know what weapon you would like to use. Here are the commands you would use to tell it:
 ```
-weapons					# This will list off the different weapons available to you.
-							# NOTE: This list will include the different ways that you could hold your weapon or the different ranges you could use it at as separate weapons. Each of these will be labeled as 'weapon_#' with each number corresponding to a different way of holding or a different range.
-equip unarmed			# This will equip the weapon 'unarmed'. Doing this will set the values of 'attack' and 'damage' to those of the weapon you have chosen.
-create weapon 1 1d2+1	# This will create a weapon called 'weapon' that has a '1' attack and a '1d2+1' damage.
+weapons:					# This will list off the different weapons available to you.
+								# NOTE: This list will include the different ways that you could hold your weapon or the different ranges you could use it at as separate weapons. Each of these will be labeled as 'weapon_#' with each number corresponding to a different way of holding or a different range.
+equip:: unarmed				# This will equip the weapon 'unarmed'. Doing this will set the values of 'attack' and 'damage' to those of the weapon you have chosen.
+create:: weapon:: 1:: 1d2+1	# This will create a weapon called 'weapon' that has a '1' attack and a '1d2+1' damage.
 ```
 
 ### CONNECTING TO OTHERS:
 One of RPGEngine's main features is the ability to connect to others. Once a connection is creaed a whole suite of new features become available. Creating a connection is quite simple and only requires a couple of commands:
 ```
-join 25566 8.24.563.274	# This command is used to connect to a game that is being created by the host. The first variable is the port, the second is the IP address.
-host 25566 4			# This command is used to host a game. The first variable is the port, the second variable is the number of players. The game will not start until that number of players have joined.
-							# NOTE: It is recommended that the host explicitly forward the port he/she would like to use for hosting. Not doing so may cause other players to be unable to connect.
-disconnect				# This command will disconnect you from whomever you are currently connected to.
+client:: 25566:: 8.24.563.274	# This command is used to connect to a game that is being created by the host. The first variable is the port, the second is the IP address.
+host:: 25566:: 4				# This command is used to host a game. The first variable is the port, the second variable is the number of players. The game will not start until that number of players have joined.
+									# NOTE: It is recommended that the host explicitly forward the port he/she would like to use for hosting. Not doing so may cause other players to be unable to connect.
+disconnect:						# This command will disconnect you from whomever you are currently connected to.
 ```
 
 ### CHATTING:
 RPGEngine comes with built-in chat functionality while connected to others. Here is a list of commands to use that functionality:
 ```
-chat					# This command turns chat on or off for you. Use this command to prevent yourself from receiving chat messages.
+chat:					# This command turns chat on or off for you. Use this command to prevent yourself from receiving chat messages.
 "my cmb is "+cmb		# Putting something in quotation marks will send a chat message. Variables can be added to messages just like they were numbers and their values will be added to the string.
 ```
 
 ### PLAYING ENCOUNTERS:
 RPGEngine also supports a dynamic game system. This comes in the form of a large grid that you can move your character around if you are a player or draw in places and enemies if you are the host. Using this system is somewhat complicated at first. We'll start with the basics:
 ```
-encounter	# This command will initiate an encounter. All connected players must enter the encounter to start.
+encounter:	# This command will initiate an encounter. All connected players must enter the encounter to start.
 ```
 
 Once you are part of a game you will see a window fairly empty except for the players at the center. Now you need to be able to do things in your world. Here are the keyboard combinations for the things you can do:
@@ -96,11 +96,11 @@ Shift-BackSpace			# This key combination will delete the currently selected enem
 PARTICIPATING IN BATTLES:
 Battle mode allows for automatic management of turns. Here is a list of the commands used to manage battles:
 ```
-battle		# This command will attempt to start a battle. All connected players must enter this command for the battle to start.
+battle:		# This command will attempt to start a battle. All connected players must enter this command for the battle to start.
 				# NOTE: You must be in a game for this to work.
-done		# This command will end your turn.
-hold		# This command will hold your turn, permanently moving you one forward in the turn order.
-end			# This command will end the battle.
+done:		# This command will end your turn.
+hold:		# This command will hold your turn, permanently moving you one forward in the turn order.
+end:		# This command will end the battle.
 				# NOTE: This command can only be used by the host during his/her turn.
 ```
 
@@ -114,14 +114,14 @@ This tutorial will explain the uses for the remaining less-used commands that we
 ### ADVANCED COMMANDS:
 We'll begin the advanced tutorial by covering some of the more complicated console commands. Here are the rest of the commands not covered by the Basic Tutorial:
 ```
-open						# This command will allow one extra player to join an in-progress game.
+addclient:					# This command will allow one extra player to join an in-progress game.
 								# NOTE: This command must be used by the host when not in a battle.
 sin:(x)						# This command will display the sine of 'x'. The colon may be omitted.
 f(x) = x					# This command is used to create functions. This particular command can be read as 'f(x) = x'.
 f(x) = -x@x<0;x				# This command is used to define piecewise functions. This particular command can be read as 'f(x) = (-1*x if x<0) or (x if else)'.
 0,1,2,3~\x\x+1				# This command will execute 'x+1' for when x is 0, 1, 2, and 3.
-run Extras.txt				# This command will run a file that contains commands.
-install Extras.py			# This command will import a specially-written RPGEngine python add-on.
+run:: Extras.txt			# This command will run a file that contains commands.
+install:: Extras.py			# This command will import a specially-written RPGEngine python add-on.
 ```
 
 ### CHANGING OPTIONS:
