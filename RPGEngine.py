@@ -97,9 +97,9 @@ class main(mathbase, serverbase):
         self.x = -1
         self.talk = 0
         self.encounter = 0
-        if not self.saferun(self.evalfile, "Rules.txt"):
-            popup("Error", "Error finding Rules.txt for import.")
-            self.app.display("Unable to find Rules.txt for import.")
+        if not self.saferun(self.evalfile, "Rules.rab"):
+            popup("Error", "Error finding Rules.rab for import.")
+            self.app.display("Unable to find Rules.rab for import.")
         self.app.display("Enter A Command:")
 
     def load(self):
