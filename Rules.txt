@@ -1,5 +1,5 @@
 # Base Options:
-base_roll = 1d20
+base_roll = d20
 rest_health = level
 
 # Attribute Options:
