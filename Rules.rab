@@ -1,3 +1,7 @@
+# Includes:
+include(Unicode, Meta)
+d = rand
+
 # Base Options:
 base_roll = d20
 rest_health = level
