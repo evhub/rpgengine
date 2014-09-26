@@ -130,7 +130,7 @@ class main(mathbase, serverbase):
         lines = base.splitlines()
         for y in xrange(0, len(lines)):
             if lines[y].startswith("CHARACTER NAME"):
-                self.e.variables["name"] = basicformat(lines[y-1].split()[0])
+                self.e.variables["name"] = rawstrcalc(basicformat(lines[y-1].split()[0]))
                 for z in lines[y+1].split("	")[0].split(" "):
                     for i in reversed(xrange(0, len(z))):
                         if z[i] not in string.digits:
@@ -302,38 +302,38 @@ class main(mathbase, serverbase):
         if not top:
             self.e.fresh()
         self.e.makevars({
-            "debug":funcfloat(self.debugcall, self.e, "debug"),
-            "make":funcfloat(self.makecall, self.e, "make", reqargs=1),
-            "save":funcfloat(self.savecall, self.e, "save", reqargs=1),
-            "print":funcfloat(self.printcall, self.e, "print"),
-            "show":funcfloat(self.showcall, self.e, "show"),
-            "ans":funcfloat(self.anscall, self.e, "ans"),
-            "grab":funcfloat(self.grabcall, self.e, "grab"),
-            "clear":usefunc(self.clear, self.e, "clear"),
-            "name":"Guest",
-            "skills":usefunc(self.skills, self.e, "skills"),
-            "roll":funcfloat(self.rollcall, self.e, "roll"),
-            "character":usefunc(self.show_character, self.e, "character"),
-            "weapons":usefunc(self.show_weapons, self.e, "weapons"),
-            "create":funcfloat(self.createcall, self.e, "create"),
-            "equip":funcfloat(self.equipcall, self.e, "equip"),
-            "status":usefunc(self.status, self.e, "status"),
-            "deal":funcfloat(self.dealcall, self.e, "deal"),
-            "cast":funcfloat(self.castcall, self.e, "cast"),
-            "casts":usefunc(self.show_casts, self.e, "casts"),
-            "rest":usefunc(self.do_rest, self.e, "rest"),
-            "reload":usefunc(self.do_reload, self.e, "reload"),
-            "client":funcfloat(self.clientcall, self.e, "client"),
-            "host":funcfloat(self.hostcall, self.e, "host"),
-            "encounter":usefunc(self.do_encounter, self.e, "encounter"),
-            "disconnect":usefunc(self.do_disconnect, self.e, "disconnect"),
-            "battle":usefunc(self.do_battle, self.e, "battle"),
-            "addclient":usefunc(self.do_addclient, self.e, "addclient"),
-            "hold":usefunc(self.do_hold, self.e, "hold"),
-            "done":usefunc(self.do_done, self.e, "done"),
-            "wipe":usefunc(self.do_wipe, self.e, "wipe"),
-            "end":usefunc(self.do_end, self.e, "end"),
-            "chat":usefunc(self.do_chat, self.e, "chat")
+            "debug":funcfloat(self.debugcall, "debug"),
+            "make":funcfloat(self.makecall, "make", reqargs=1),
+            "save":funcfloat(self.savecall, "save", reqargs=1),
+            "print":funcfloat(self.printcall, "print"),
+            "show":funcfloat(self.showcall, "show"),
+            "ans":funcfloat(self.anscall, "ans"),
+            "grab":funcfloat(self.grabcall, "grab"),
+            "clear":usefunc(self.clear, "clear"),
+            "name":rawstrcalc("Guest"),
+            "skills":usefunc(self.skills, "skills"),
+            "roll":funcfloat(self.rollcall, "roll"),
+            "character":usefunc(self.show_character, "character"),
+            "weapons":usefunc(self.show_weapons, "weapons"),
+            "create":funcfloat(self.createcall, "create"),
+            "equip":funcfloat(self.equipcall, "equip"),
+            "status":usefunc(self.status, "status"),
+            "deal":funcfloat(self.dealcall, "deal"),
+            "cast":funcfloat(self.castcall, "cast"),
+            "casts":usefunc(self.show_casts, "casts"),
+            "rest":usefunc(self.do_rest, "rest"),
+            "reload":usefunc(self.do_reload, "reload"),
+            "client":funcfloat(self.clientcall, "client"),
+            "host":funcfloat(self.hostcall, "host"),
+            "encounter":usefunc(self.do_encounter, "encounter"),
+            "disconnect":usefunc(self.do_disconnect, "disconnect"),
+            "battle":usefunc(self.do_battle, "battle"),
+            "addclient":usefunc(self.do_addclient, "addclient"),
+            "hold":usefunc(self.do_hold, "hold"),
+            "done":usefunc(self.do_done, "done"),
+            "wipe":usefunc(self.do_wipe, "wipe"),
+            "end":usefunc(self.do_end, "end"),
+            "chat":usefunc(self.do_chat, "chat")
             })
 
     def skills(self):
@@ -498,7 +498,7 @@ class main(mathbase, serverbase):
                 self.host = None
             self.server = False
             self.talk = 1
-            self.name = self.e.find("name", False, True)
+            self.name = self.e.prepare(self.e.calc("name", " | name"), True, False)
             self.register(self.connect, 200)
         else:
             raise ExecutionError("ArgumentError", "Too many arguments to client")
@@ -516,7 +516,7 @@ class main(mathbase, serverbase):
                 self.number = 1
             self.server = True
             self.talk = 1
-            self.names = {None: self.e.find("name", False, True)}
+            self.names = {None: self.e.prepare(self.e.calc("name", " | name"), True, False)}
             self.register(self.connect, 200)
         else:
             raise ExecutionError("ArgumentError", "Too many arguments to host")

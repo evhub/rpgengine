@@ -1,6 +1,6 @@
 # Includes:
-include(Unicode, Meta)
-d = rand
+include(Unicode, Meta, Rand)
+d = die
 
 # Base Options:
 base_roll = d20
