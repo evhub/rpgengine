@@ -384,15 +384,15 @@ class main(mathbase, serverbase):
             raise ExecutionError("ArgumentError", "Not enough arguments to equip")
         elif len(variables) < 3:
             name = self.e.prepare(variables[0], False, False)
-            self.e.variables["critrange"] = name+"_critrange"
-            self.e.variables["crittimes"] = name+"_crittimes"
+            self.e.variables["critrange"] = "prop<<"+name+"_critrange>>"
+            self.e.variables["crittimes"] = "prop<<"+name+"_crittimes>>"
             if len(original) > 1:
                 variant = self.e.prepare(variables[1], False, False)
-                self.e.variables["attack"] = name+"_attack_"+variant
-                self.e.variables["damage"] = name+"_damage_"+variant
+                self.e.variables["attack"] = "prop<<"+name+"_attack_"+variant+">>"
+                self.e.variables["damage"] = "prop<<"+name+"_damage_"+variant+">>"
             else:
-                self.e.variables["attack"] = name+"_attack"
-                self.e.variables["damage"] = name+"_damage"
+                self.e.variables["attack"] = "prop<<"+name+"_attack>>"
+                self.e.variables["damage"] = "prop<<"+name+"_damage>>"
             self.setreturned()
         else:
             raise ExecutionError("ArgumentError", "Too many arguments to equip")
