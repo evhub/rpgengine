@@ -1,9 +1,9 @@
 # Includes:
 include(Unicode, Meta, Rand)
-d = die
+d := die
 
 # Base Options:
-base_roll = d20
+base_roll := d20
 rest_health = level
 
 # Attribute Options:

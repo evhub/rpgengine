@@ -12,9 +12,6 @@
 # EDITOR made in 2012
 # This program allows dynamic mathematical processing over RPG statistics.
 
-# To-Do:
-# - non-dm hosting
-
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 # CONFIG AREA:
 #-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
@@ -42,7 +39,7 @@ from rabbit.all import *
 
 def customformat(inputstring):
     inputstring = delspace(superformat(inputstring))
-    if inputstring == "n,a":
+    if inputstring in ["n,a", "n/a"]:
         inputstring = "0/0"
     outstring = ""
     for x in inputstring.split(","):

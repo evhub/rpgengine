@@ -54,17 +54,17 @@ character:	# This will display a basic summary of your character
 ### EQUIPPING WEAPONS:
 Upon loading in your PC you will notice that the variables 'attack' and 'damage' are left undefined. That is because the program doesn't know what weapon you would like to use. Here are the commands you would use to tell it:
 ```
-weapons:					# This will list off the different weapons available to you.
-								# NOTE: This list will include the different ways that you could hold your weapon or the different ranges you could use it at as separate weapons. Each of these will be labeled as 'weapon_#' with each number corresponding to a different way of holding or a different range.
-equip:: unarmed				# This will equip the weapon 'unarmed'. Doing this will set the values of 'attack' and 'damage' to those of the weapon you have chosen.
-create:: weapon:: 1:: 1d2+1	# This will create a weapon called 'weapon' that has a '1' attack and a '1d2+1' damage.
+weapons:						# This will list off the different weapons available to you.
+									# NOTE: This list will include the different ways that you could hold your weapon or the different ranges you could use it at as separate weapons. Each of these will be labeled as 'weapon_#' with each number corresponding to a different way of holding or a different range.
+equip: "unarmed"				# This will equip the weapon 'unarmed'. Doing this will set the values of 'attack' and 'damage' to those of the weapon you have chosen.
+create: "weapon": "1": "1d2+1"	# This will create a weapon called 'weapon' that has a '1' attack and a '1d2+1' damage.
 ```
 
 ### CONNECTING TO OTHERS:
 One of RPGEngine's main features is the ability to connect to others. Once a connection is creaed a whole suite of new features become available. Creating a connection is quite simple and only requires a couple of commands:
 ```
-client:: 25566:: 8.24.563.274	# This command is used to connect to a game that is being created by the host. The first variable is the port, the second is the IP address.
-host:: 25566:: 4				# This command is used to host a game. The first variable is the port, the second variable is the number of players. The game will not start until that number of players have joined.
+client: 25566: "8.24.563.274"	# This command is used to connect to a game that is being created by the host. The first variable is the port, the second is the IP address.
+host: 25566: 4					# This command is used to host a game. The first variable is the port, the second variable is the number of players. The game will not start until that number of players have joined.
 									# NOTE: It is recommended that the host explicitly forward the port he/she would like to use for hosting. Not doing so may cause other players to be unable to connect.
 disconnect:						# This command will disconnect you from whomever you are currently connected to.
 ```
@@ -119,21 +119,20 @@ addclient:					# This command will allow one extra player to join an in-progress
 sin:(x)						# This command will display the sine of 'x'. The colon may be omitted.
 f(x) = x					# This command is used to create functions. This particular command can be read as 'f(x) = x'.
 f(x) = -x@x<0;x				# This command is used to define piecewise functions. This particular command can be read as 'f(x) = (-1*x if x<0) or (x if else)'.
-0,1,2,3~\x\x+1				# This command will execute 'x+1' for when x is 0, 1, 2, and 3.
+0,1,2,3~\x\(x+1)			# This command will execute 'x+1' for when x is 0, 1, 2, and 3.
 run:: Extras.txt			# This command will run a file that contains commands.
-install:: Extras.py			# This command will import a specially-written RPGEngine python add-on.
 ```
 
 ### CHANGING OPTIONS:
 To change different RPGEngine options one should navigate to and open the file 'Rules.txt' within their RPGEngine directory. Once in that file changes can be made as necessary. Every line in the file that does not start with a '#' will be run as a command. Certain special variables must be defined in Rules.txt. They are:
 ```
-str			# Attribute modifiers must be defined. Attribute scores are imported.
-base_roll	# This defines the base roll to be made when the 'roll' command is used.
-rest_health	# This defines the health restored when the 'rest' command is used.
+str, dex, etc.	# Attribute modifiers must be defined. Attribute scores are imported.
+base_roll		# This defines the base roll to be made when the 'roll' command is used.
+rest_health		# This defines the health restored when the 'rest' command is used.
 ```
 
 ### MODIFYING GRAPHICS:
-RPGEngine uses different '.gif' files to build it's game space. Here are descriptions of those files and how to use them:
+RPGEngine uses different '.gif' files to build its game space. Here are descriptions of those files and how to use them:
 ```
 Player.gif	# This graphic defines what players look like. It should be square.
 Enemy.gif	# This graphic defines what enemies look like. It should have the same dimensions as 'Player.gif'.
