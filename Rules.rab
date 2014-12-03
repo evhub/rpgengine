@@ -5,6 +5,8 @@ d := die
 # Base Options:
 base_roll := d20
 rest_health = level
+death_health = prop<<-con_score>>
+(name := "Guest") @! var("name")
 
 # Attribute Options:
 ability_modifier(x) = floor:((x-10)/2)
@@ -43,6 +45,14 @@ refl = prop<<reflex>>
 (hybrid := 0) @! var("hybrid")
 (elementalist := 0) @! var("elementalist")
 (chemist := 0) @! var("chemist")
+
+# Power Attack Extras:
+power_attack_penalty = -(1+floor(bab/4))
+power_attack = prop<<attack+power_attack_penalty>>
+power_damage_base = 2+2*floor(bab/4)
+power_damage_P = prop<<damage+power_damage_base>>
+power_damage_S = prop<<damage+power_damage_base/2>>
+power_damage_B = prop<<damage+floor(power_damage_base*1.5)>>
 
 # Monk Extras:
 flurry_bonus(x) = monk-2@x<=1; monk-7@x<=3; monk-12@x<=5; monk-17

@@ -129,6 +129,7 @@ To change different RPGEngine options one should navigate to and open the file '
 str, dex, etc.	# Attribute modifiers must be defined. Attribute scores are imported.
 base_roll		# This defines the base roll to be made when the 'roll' command is used.
 rest_health		# This defines the health restored when the 'rest' command is used.
+death_health	# This defines the health below which the character will be considered dead.
 ```
 
 ### MODIFYING GRAPHICS:

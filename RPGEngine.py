@@ -39,7 +39,7 @@ from rabbit.all import *
 
 def customformat(inputstring):
     inputstring = delspace(superformat(inputstring))
-    if inputstring in ["n,a", "n/a"]:
+    if inputstring in ["n,a", "n/a", "na"]:
         inputstring = "0/0"
     outstring = ""
     for x in inputstring.split(","):
@@ -244,7 +244,7 @@ class main(mathbase, serverbase):
                     self.e.variables[name+"_damage_6"] = customformat(groups[x][i+5])
             elif groups[x][0] == "MONEY":
                 break
-        self.spellcaster = 0
+        self.e.variables["spellcaster"] = False
         y = x
         for x in xrange(y, len(groups)):
             if "Spells" in groups[x][0] and groups[x][1].startswith("LEVEL"):
@@ -258,7 +258,7 @@ class main(mathbase, serverbase):
                             self.e.variables["level_"+istr+"_maxcasts"] = casts
                             self.e.variables["level_"+istr+"_casts"] = casts
                             i += 1
-                        self.spellcaster = 1
+                        self.e.variables["spellcaster"] = True
                         break
                 break
 
@@ -307,7 +307,6 @@ class main(mathbase, serverbase):
             "ans":funcfloat(self.anscall, "ans"),
             "grab":funcfloat(self.grabcall, "grab"),
             "clear":usefunc(self.clear, "clear"),
-            "name":rawstrcalc("Guest"),
             "skills":usefunc(self.skills, "skills"),
             "roll":funcfloat(self.rollcall, "roll"),
             "character":usefunc(self.show_character, "character"),
@@ -334,66 +333,80 @@ class main(mathbase, serverbase):
             })
 
     def skills(self):
-        self.app.display("Skills: "+strlist(self.skills, ", "))
         self.setreturned()
+        self.app.display("Skills: "+strlist(self.skills, ", "))
 
     def rollcall(self, variables):
+        self.setreturned()
         if not variables:
             calcbonus = 0.0
-        elif len(variables) == 1:
+        elif len(variables) > 1:
+            calcbonus = diagmatrixlist(variables)
+        elif isnum(variables[0]):
             calcbonus = variables[0]
         else:
-            calcbonus = diagmatrixlist(variables)
+            calcbonus = self.e.getcall(variables[0])()
+        roll = self.e.calc("base_roll()")
         if isinstance(calcbonus, matrix):
-            toroll = "base_roll(),"*calcbonus.y
-            roll = self.e.calc(toroll[:-1])
-        else:
-            roll = self.e.calc("base_roll()")
+            roll = diagmatrix(calcbonus.y, roll)
         rollstr = self.e.prepare(roll, False, True)
         total = roll+calcbonus
         totalstr = self.e.prepare(total, False, True)
         self.app.display("Roll: "+rollstr)
         self.app.display("Total: "+totalstr)
         if self.sendroll:
-            self.textmsg(" rolled "+rollstr+" + "+bonus+" = "+totalstr)
-        self.setreturned()
+            self.textmsg(" rolled "+rollstr+" + "+self.e.prepare(calcbonus, False, True)+" = "+totalstr)
         return total
 
     def show_character(self):
-        popup("Info", self.character())
         self.setreturned()
+        popup("Info", self.character())
 
     def show_weapons(self, original):
-        self.app.display(self.weapons())
         self.setreturned()
+        self.app.display(self.weapons())
 
     def createcall(self, variables):
+        self.setreturned()
         if len(variables) < 3:
             raise ExecutionError("ArgumentError", "Not enough arguments to create")
         elif len(variables) == 3:
-            name = self.e.prepare(variables[0], False, False)
-            self.weps.append(name)
-            self.e.variables[name+"_attack"] = variables[1]
-            self.e.variables[name+"_attack"] = variables[2]
-            self.setreturned()
+            if isinstance(variables[0], strcalc) and isinstance(variables[1], strcalc) and isinstance(variables[2], strcalc):
+                name = str(variables(0))
+                if self.e.isreserved(name):
+                    raise ValueError("Invalid part of a variable name "+name)
+                else:
+                    self.weps.append(name)
+                    self.e.variables[name+"_attack"] = variables[1]
+                    self.e.variables[name+"_attack"] = variables[2]
+            else:
+                raise ExecutionError("ValueError", "Expected all str arguments to create")
         else:
             raise ExecutionError("ArgumentError", "Too many arguments to create")
 
     def equipcall(self, variables):
+        self.setreturned()
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to equip")
         elif len(variables) < 3:
-            name = self.e.prepare(variables[0], False, False)
-            self.e.variables["critrange"] = "prop<<"+name+"_critrange>>"
-            self.e.variables["crittimes"] = "prop<<"+name+"_crittimes>>"
-            if len(original) > 1:
-                variant = self.e.prepare(variables[1], False, False)
-                self.e.variables["attack"] = "prop<<"+name+"_attack_"+variant+">>"
-                self.e.variables["damage"] = "prop<<"+name+"_damage_"+variant+">>"
+            if isinstance(variables[0], strcalc):
+                name = str(variables[0])
             else:
-                self.e.variables["attack"] = "prop<<"+name+"_attack>>"
-                self.e.variables["damage"] = "prop<<"+name+"_damage>>"
-            self.setreturned()
+                raise ExecutionError("ValueError", "Expected the first argument to equip to be a str")
+            if self.e.isreserved(name):
+                raise ValueError("Invalid part of a variable name "+name)
+            else:
+                self.e.variables["critrange"] = "prop<<"+name+"_critrange>>"
+                self.e.variables["crittimes"] = "prop<<"+name+"_crittimes>>"
+                if len(variables) == 1:
+                    self.e.variables["attack"] = "prop<<"+name+"_attack>>"
+                    self.e.variables["damage"] = "prop<<"+name+"_damage>>"
+                elif isinstance(variables[1], strcalc):
+                    variant = str(variables[1])
+                    self.e.variables["attack"] = "prop<<"+name+"_attack_"+variant+">>"
+                    self.e.variables["damage"] = "prop<<"+name+"_damage_"+variant+">>"
+                else:
+                    raise ExecutionError("ValueError", "Expected the second argument to equip to be a str")
         else:
             raise ExecutionError("ArgumentError", "Too many arguments to equip")
 
@@ -401,6 +414,7 @@ class main(mathbase, serverbase):
         self.dealcall([0.0])
 
     def dealcall(self, variables):
+        self.setreturned()
         if istext(self.e.variables["hp"]):
             self.e.variables["hp"] = self.e.calc(self.e.variables["hp"])
         self.e.variables["hp"] -= self.e.funcs.sumcall(variables)
@@ -411,9 +425,7 @@ class main(mathbase, serverbase):
         self.app.display("HP: "+self.e.prepare(self.e.variables["hp"], False, True)+"/"+self.e.prepare(self.e.variables["maxhp"], False, True))
         pop = False
         outstring = "Status: "
-        if istext(self.e.variables["con_score"]):
-            self.e.variables["con_score"] = self.e.calc(self.e.variables["con_score"])
-        if self.e.variables["hp"] < -1.0*self.e.variables["con_score"]:
+        if self.e.variables["hp"] < self.e.calc("death_health"):
             outstring += "Dead"
             pop = "You're Dead!"
         elif self.e.variables["hp"] <= 0:
@@ -423,70 +435,66 @@ class main(mathbase, serverbase):
         self.app.display(outstring)
         if pop:
             popup("Info", pop)
-        self.setreturned()
 
     def castcall(self, variables):
+        self.setreturned()
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to cast")
-        elif len(variables) == 1:
-            if self.spellcaster == 0:
-                self.app.display("You're not a spellcaster!")
-            else:
-                if isnum(variables[0]):
-                    original = engnum(variables[0])
+        elif self.e.variables["spellcaster"]:
+            for arg in variables:
+                if isnum(arg):
+                    original = engnum(arg)
+                elif isinstance(arg, strcalc):
+                    original = str(arg)
                 else:
-                    original = self.e.prepare(variables[0], False, False)
+                    raise ExecutionError("ValueError", "Expected the first argument to cast to be an int")
                 if self.e.isreserved(original):
                     raise ValueError("Invalid part of a variable name "+original)
-                elif getnum(self.e.calc(self.e.variables["level_"+original+"_casts"])) <= 0:
+                elif self.e.calc(self.e.variables["level_"+original+"_casts"]) <= 0:
                     self.app.display("You're out of level "+original+" casts!")
                 else:
                     self.e.variables["level_"+original+"_casts"] = self.e.calc("level_"+original+"_casts-1")
                     self.app.display("Level "+original+" Casts Used: "+self.e.prepare(self.e.variables["level_"+original+"_casts"], False, True)+"/"+self.e.prepare(self.e.variables["level_"+original+"_maxcasts"], False, True))
-            self.setreturned()
         else:
-            for arg in variables:
-                self.castcall([arg])
+            self.app.display("You're not a spellcaster!")
 
     def show_casts(self):
-        if self.spellcaster == 0:
-            self.app.display("You're not a spellcaster!")
-        else:
-            error = 0
+        self.setreturned()
+        if self.e.variables["spellcaster"]:
             level = 0
-            while error == 0:
+            while True:
                 name = engnum(level)
                 try:
                     self.app.display("Level "+name+" Casts Used: "+self.e.prepare(self.e.variables["level_"+name+"_casts"], False, True)+"/"+self.e.prepare(self.e.variables["level_"+name+"_maxcasts"], False, True))
                 except:
-                    error = 1
+                    break
                 level += 1
-        self.setreturned()
+        else:
+            self.app.display("You're not a spellcaster!")
 
     def do_rest(self):
-        if self.spellcaster == 1:
-            error = 0
+        self.setreturned()
+        if self.e.variables["spellcaster"]:
             level = 0
-            while error == 0:
+            while True:
                 name = engnum(level)
                 try:
                     self.e.variables["level_"+name+"_casts"] = self.e.variables["level_"+name+"_maxcasts"]
                 except:
-                    error = 1
+                    break
                 level += 1
-        self.setreturned()
         self.dealcall([self.e.calc("-1*rest_health")])
 
     def do_reload(self):
-        self.load()
         self.setreturned()
+        self.load()
         self.app.display("Enter A Command:")
 
     def clientcall(self, variables):
+        self.setreturned()
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to client")
         elif len(variables) < 3:
-            self.setreturned()
             self.app.display("Connecting...")
             self.port = getint(variables[0])
             if len(variables) > 1:
@@ -495,16 +503,16 @@ class main(mathbase, serverbase):
                 self.host = None
             self.server = False
             self.talk = 1
-            self.name = self.e.prepare(self.e.calc("name", " | name"), True, False)
+            self.name = self.e.prepare(self.e.calc("name"), True, False)
             self.register(self.connect, 200)
         else:
             raise ExecutionError("ArgumentError", "Too many arguments to client")
 
     def hostcall(self, variables):
+        self.setreturned()
         if not variables:
             raise ExecutionError("ArgumentError", "Not enough arguments to host")
         elif len(variables) < 3:
-            self.setreturned()
             self.app.display("Waiting for connections...")
             self.port = getint(variables[0])
             if len(original) > 1:
@@ -513,12 +521,13 @@ class main(mathbase, serverbase):
                 self.number = 1
             self.server = True
             self.talk = 1
-            self.names = {None: self.e.prepare(self.e.calc("name", " | name"), True, False)}
+            self.names = {None: self.e.prepare(self.e.calc("name"), True, False)}
             self.register(self.connect, 200)
         else:
             raise ExecutionError("ArgumentError", "Too many arguments to host")
 
     def do_encounter(self):
+        self.setreturned()
         if self.encounter != 0 or self.server == None:
             self.app.display("You can't use that right now.")
         else:
@@ -526,7 +535,6 @@ class main(mathbase, serverbase):
             self.sync()
             self.app.display("Launching game...")
             self.gui()
-        self.setreturned()
 
     def do_disconnect(self):
         self.setreturned()
@@ -536,11 +544,11 @@ class main(mathbase, serverbase):
             self.disconnect()
 
     def do_battle(self):
+        self.setreturned()
         if self.server == None or self.x >= 0:
             self.app.display("You can't use that right now.")
         else:
             self.battle()
-        self.setreturned()
 
     def do_addclient(self):
         self.setreturned()
@@ -577,21 +585,22 @@ class main(mathbase, serverbase):
             self.app.display("You can't use that right now.")
 
     def do_wipe(self):
+        self.setreturned()
         if self.server and self.turn == 2:
             self.structures = []
         else:
             self.app.display("You can't use that right now.")
-        self.setreturned()
 
     def do_end(self):
+        self.setreturned()
         if self.server and self.turn == 2:
             self.turn = 0
             self.x = -2
         else:
             self.app.display("You can't use that right now.")
-        self.setreturned()
 
     def do_chat(self):
+        self.setreturned()
         if self.talk == 1:
             self.talk = 0
             self.app.display("Chat turned off.")
@@ -601,7 +610,6 @@ class main(mathbase, serverbase):
             else:
                 self.talk = 1
                 self.app.display("Chat turned on.")
-        self.setreturned()
 
     def convert(self, x, y):
         return self.width/2 + (x+1)*self.xsize, self.height/2 - (y-1)*self.ysize
@@ -612,10 +620,10 @@ class main(mathbase, serverbase):
     def battle(self):
         self.x = 0
         self.turn = 0
-        roll = self.e.calc("base_roll:")
+        roll = self.e.calc("base_roll()")
         if self.server:
             self.app.display("Initiative Roll: "+self.e.prepare(roll, False, False))
-            total = float(roll+self.e.calc("initiative"))
+            total = getnum(roll+self.e.calc("initiative"))
             self.app.display("Initiative Total: "+str(total))
             self.app.display("Getting Initiatives...")
             inits = self.receive()
@@ -631,7 +639,7 @@ class main(mathbase, serverbase):
             self.register(self.rounds, 600)
         elif self.server != None:
             self.app.display("Initiative Roll: "+self.e.prepare(roll, False, False))
-            total = str(float(roll+self.e.calc("initiative")))
+            total = str(getnum(roll+self.e.calc("initiative")))
             self.app.display("Initiative Total: "+total)
             self.queue.append(total)
             self.register(self.idle, 600)
