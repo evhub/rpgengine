@@ -94,7 +94,7 @@ class main(mathbase, serverbase):
         self.talk = 0
         self.encounter = 0
         self.app.display("Loading...")
-        self.register(self.load, 200)
+        self.register(self.load, 500)
 
     def load(self):
         if self.debug:
