@@ -6,7 +6,7 @@ d := die
 base_roll := d20
 rest_health = level
 death_health = prop<<-con_score>>
-(name := "Guest") @! var("name")
+(name := "Guest") @! exists("name")
 
 # Attribute Options:
 ability_modifier(x) = floor:((x-10)/2)
@@ -39,12 +39,12 @@ fort = prop<<fortitude>>
 refl = prop<<reflex>>
 
 # Class Defaults:
-(monk := 0) @! var("monk")
-(autochemist := 0) @! var("autochemist")
-(roboticist := 0) @! var("roboticist")
-(hybrid := 0) @! var("hybrid")
-(elementalist := 0) @! var("elementalist")
-(chemist := 0) @! var("chemist")
+(monk := 0) @! exists("monk")
+(autochemist := 0) @! exists("autochemist")
+(roboticist := 0) @! exists("roboticist")
+(hybrid := 0) @! exists("hybrid")
+(elementalist := 0) @! exists("elementalist")
+(chemist := 0) @! exists("chemist")
 
 # Power Attack Extras:
 power_attack_penalty = -(1+floor(bab/4))

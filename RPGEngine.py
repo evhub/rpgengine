@@ -88,16 +88,13 @@ class main(mathbase, serverbase):
         self.sendroll = sendroll
         self.root, self.app, self.box = startconsole(self.handler, "Loading RPGEngine...", "RPGEngine", height)
         self.populator()
-        self.load()
         self.server = None
         self.turn = -1
         self.x = -1
         self.talk = 0
         self.encounter = 0
-        if not self.saferun(self.evalfile, "Rules.rab"):
-            popup("Error", "Error finding Rules.rab for import.")
-            self.app.display("Unable to find Rules.rab for import.")
-        self.app.display("Enter A Command:")
+        self.app.display("Loading...")
+        self.register(self.load, 200)
 
     def load(self):
         if self.debug:
@@ -119,6 +116,10 @@ class main(mathbase, serverbase):
                 self.app.display("Unable to load PC.txt for import.")
             else:
                 self.app.display("Successfully imported PC.txt.")
+        if not self.saferun(self.evalfile, "Rules.rab"):
+            popup("Error", "Error finding Rules.rab for import.")
+            self.app.display("Unable to find Rules.rab for import.")
+        self.app.display("Enter A Command:")
 
     def remparens(self, inputstring):
         return delspace(inputstring, strlist(self.e.groupers.keys()+self.e.groupers.values(), ""))
@@ -300,7 +301,8 @@ class main(mathbase, serverbase):
             self.e.fresh()
         self.e.makevars({
             "debug":funcfloat(self.debugcall, "debug"),
-            "make":funcfloat(self.makecall, "make", reqargs=1),
+            "make":funcfloat(self.e.funcs.docalc, "make", reqargs=1),
+            "cmd":funcfloat(self.e.funcs.docalc, "cmd", reqargs=1),
             "save":funcfloat(self.savecall, "save", reqargs=1),
             "print":funcfloat(self.printcall, "print"),
             "show":funcfloat(self.showcall, "show"),
