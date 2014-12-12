@@ -1,6 +1,9 @@
 # Includes:
 include(Unicode, Meta, Rand)
+
+# Aliases:
 d := die
+say := print
 
 # Base Options:
 base_roll := d20
